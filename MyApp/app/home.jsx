@@ -11,7 +11,7 @@ const home = () => {
     <Link
     href={{
       pathname: '/playQuiz',
-      query: { id: item.id }
+      params: { id: item.id }
     }}
     style={[{ marginHorizontal: 'auto' }]}
     asChild
@@ -21,6 +21,7 @@ const home = () => {
       <Text style={styles.quizText}>Items: {item.questions.length}</Text>
     </Pressable>
     </Link>
+    
   )
 
   return (
