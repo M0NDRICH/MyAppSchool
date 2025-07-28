@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Platform, Pressable} from 'react-native'
-import React,{useState} from 'react'
+import { View, Text, StyleSheet, Platform, Pressable, FlatList, TouchableOpacity} from 'react-native'
+import React,{useState, useRef} from 'react'
 import { useLocalSearchParams, Link } from 'expo-router'
 import { SafeAreaView } from "react-native-safe-area-context"
 import { data } from '@/data/quizzes'
@@ -7,19 +7,103 @@ import { data } from '@/data/quizzes'
 const playQuiz = () => {
   const {id} = useLocalSearchParams();
   const [quizzes, setQuizzes] = useState(data);
+  const flatListRef = useRef(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [quizIndex, setQuizIndex] = useState(0);
   let targetQuiz;
-  console.log(id ? 'not null' : 'is null');
-  console.log(id);
+  let targetQuestion = [];
 
   function getQuiz(id){
     return quizzes.find((quiz)=>
     quiz.id === Number(id)
     )
   }
-  targetQuiz = getQuiz(id);
-  // console.log(targetQuiz ? 'not null' : 'is null');
 
+  const handleNext = () => {
+  if (currentIndex < targetQuestion.length - 1) {
+    quizIndex = currentIndex + 1;
+    flatListRef.current?.scrollToIndex({ index: newIndex, animated: true });
+    setCurrentIndex(newIndex);
+  }
+  };
+
+  // const confirmButton = () => {
+  //   if (currentIndex < targetQuestion.length - 1){
+  //     const quizIndex = currentIndex + 1;
+  //     playQuiz();
+  //   }
+  // }
+ const confirmButton = () => {
+  if (quizIndex < targetQuestion.length - 1) {
+    setQuizIndex(quizIndex + 1); // ✅ trigger re-render with new question
+  }
+}
+
+
+
+  const bindingVow = (id, question, choices) => {
+    return {
+      "id": id,
+      "question": question,
+      "choices" : choices
+    }
+  }
+
+  const renderChoices = (choices) => {
+    return (
+      <>
+        {choices.a !== null && (
+          <View style={webStyles.quizQuestionChoice}>
+            <Text style={webStyles.quizQuestionChoiceText}>A: {choices.a}</Text>
+          </View>
+        )}
+        {choices.b !== null && (
+          <View style={webStyles.quizQuestionChoice}>
+            <Text style={webStyles.quizQuestionChoiceText}>B: {choices.b}</Text>
+          </View>
+        )}
+        {choices.c !== null && (
+          <View style={webStyles.quizQuestionChoice}>
+            <Text style={webStyles.quizQuestionChoiceText}>C: {choices.c}</Text>
+          </View>
+        )}
+        {choices.d !== null && (
+          <View style={webStyles.quizQuestionChoice}>
+            <Text style={webStyles.quizQuestionChoiceText}>D: {choices.d}</Text>
+          </View>
+        )}
+      </>
+    );
+  };
+
+  const abc = ['A','B', 'C', 'D'];
+
+  const renderQuizCard = (question, choices) => (
+
+     <View style={webStyles.quizBody}>
+      <View style={webStyles.quizBodyContainer}>
+        <View style={webStyles.quizQuestion}>
+          <Text style={webStyles.quizQuestionText}>{'Question:'}</Text>
+          <Text style={webStyles.quizQuestionText}>{question}</Text>
+        </View>
+        <View style={webStyles.quizQuestionChoices}>
+          {renderChoices(choices)}
+        </View>
+      </View>
+    </View>
+  )
+
+  targetQuiz = getQuiz(id);
   if (!targetQuiz) return <Text>Quiz not found</Text>;
+  
+  for(let i = 0; i < targetQuiz.questions.length; i++){
+    let question = targetQuiz.questions[i];
+    let choices = targetQuiz.choices[i];
+
+    targetQuestion.push(bindingVow( i,question, choices));
+  }
+
+ console.log(`targetquestion: ${JSON.stringify(targetQuestion[0].choices)}`)
 
   return (
     <SafeAreaView style={webStyles.safeContainer}>
@@ -40,7 +124,7 @@ const playQuiz = () => {
             <Text style={webStyles.quizNumOfItemsText}>{targetQuiz.questions.length}</Text>
           </View>
         </View>
-        <View style={webStyles.quizBody}>
+        {/* <View style={webStyles.quizBody}>
           <View style={webStyles.quizQuestion}>
             <Text style={webStyles.quizQuestionText}>{"Question Here"}</Text>
             <Text style={webStyles.quizQuestionText}>{"1 + 1?"}</Text>
@@ -59,11 +143,31 @@ const playQuiz = () => {
               <Text style={webStyles.quizQuestionChoiceText}>{"Option 4 here"}</Text>
             </View>
           </View>
+        </View> */}
+        <View style={webStyles.quizMainContainer}>
+          {/* <FlatList
+          ref={flatListRef}
+          horizontal
+          pagingEnabled
+          scrollEnabled={true}
+          showsHorizontalScrollIndicator={false}
+          data={targetQuestion}
+          keyExtractor={(quiz)=>quiz.id.toString()}
+          initialScrollIndex={currentIndex}
+          ListEmptyComponent={<Text>No Items</Text>}
+          renderItem={({item}) => (
+            renderQuizCard(item.question, item.choices)
+          )}
+        /> */}
+        {renderQuizCard(targetQuestion[quizIndex].question, targetQuestion[quizIndex].choices)}
         </View>
+        
+        {/* {renderQuizCard(targetQuestion[0].question, targetQuestion[0].choices)}
+         */}
       </View>
-      <Pressable style={webStyles.confirmButton}>
+      <TouchableOpacity style={webStyles.confirmButton} onPress={confirmButton} disabled={quizIndex === targetQuestion.length - 1}>
         <Text style={webStyles.confirmButtonText}>Confirm</Text>
-      </Pressable>
+      </TouchableOpacity>
     </SafeAreaView>
 
   )
@@ -138,12 +242,21 @@ const webStyles = StyleSheet.create({
   quizNumOfItemsText: {
     color: '#3C2F60',
     fontWeight: 'bold',
-    fontSize: '16',
+    fontSize: 16,
+  },
+  quizMainContainer: {
+    width: 250,
+    height: 500,
+    backgroundColor: 'purple',
   },
   quizBody: {
-    width: '80%',
-    height: '80%',
-    gap: 20,
+    width: '100%',
+    height: 500,
+    borderRadius: 8,
+    backgroundColor: 'aquamarine',
+  },
+  quizBodyContainer: {
+    width: 250,
   },
   quizQuestion: {
     backgroundColor: 'white',
