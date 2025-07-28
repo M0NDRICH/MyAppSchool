@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Platform, Pressable, FlatList, TouchableOpacity} from 'react-native'
-import React,{useState, useRef} from 'react'
+import { View, Text, StyleSheet, Platform, Pressable, FlatList, TouchableOpacity, Animated} from 'react-native'
+import React,{useState, useRef, useEffect} from 'react'
 import { useLocalSearchParams, Link } from 'expo-router'
 import { SafeAreaView } from "react-native-safe-area-context"
 import { data } from '@/data/quizzes'
@@ -27,19 +27,11 @@ const playQuiz = () => {
   }
   };
 
-  // const confirmButton = () => {
-  //   if (currentIndex < targetQuestion.length - 1){
-  //     const quizIndex = currentIndex + 1;
-  //     playQuiz();
-  //   }
-  // }
- const confirmButton = () => {
-  if (quizIndex < targetQuestion.length - 1) {
-    setQuizIndex(quizIndex + 1); // ✅ trigger re-render with new question
+  const confirmButton = () => {
+    if (quizIndex < targetQuestion.length - 1) {
+      setQuizIndex(quizIndex + 1); 
+    }
   }
-}
-
-
 
   const bindingVow = (id, question, choices) => {
     return {
@@ -144,7 +136,7 @@ const playQuiz = () => {
             </View>
           </View>
         </View> */}
-        <View style={webStyles.quizMainContainer}>
+        <View style={[webStyles.quizMainContainer]}>
           {/* <FlatList
           ref={flatListRef}
           horizontal
