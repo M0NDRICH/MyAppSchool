@@ -41,7 +41,7 @@ const app = () => {
        </View>
        <View style={styles.buttonPart}>
         <Link 
-        href="/home" 
+        href="/quizMenu" 
         style={{ marginHorizontal: 'auto' }}
         asChild>
         <Pressable style={styles.button}>

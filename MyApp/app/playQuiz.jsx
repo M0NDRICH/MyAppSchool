@@ -1,33 +1,41 @@
 import { View, Text, StyleSheet, Platform, Pressable, FlatList, TouchableOpacity, Animated} from 'react-native'
-import React,{useState, useRef, useEffect} from 'react'
-import { useLocalSearchParams, Link } from 'expo-router'
+import React, {useState, useRef, useEffect} from 'react'
+import { useLocalSearchParams, Link, useRouter } from 'expo-router'
 import { SafeAreaView } from "react-native-safe-area-context"
 import { data } from '@/data/quizzes'
+import { myAnswers } from '@/data/quizAnswers'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
-let currentPage = 0;
+
+let currentPage = useRef(0);
 
 const playQuiz = () => {
   const {id} = useLocalSearchParams();
   const [quizzes, setQuizzes] = useState(data);
+  const [myAnswersData, setMyAnswers] = useState(myAnswers);
   const flatListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [quizIndex, setQuizIndex] = useState(0);
+  const router = useRouter();
   let targetQuiz;
   let targetQuestion = [];
   let answer;
+
+  const saveAnswersToStorage = async (answers) => {
+    try {
+      await AsyncStorage.setItem('myAnswers', JSON.stringify(answers));
+      console.log('Answers saved!');
+    } catch (error) {
+      console.error('Failed to save answers: ', error);
+    }
+  };
+ 
 
   function getQuiz(id){
     return quizzes.find((quiz)=>
     quiz.id === Number(id)
     )
   }
-
-  const confirmButton = () => {
-    if (quizIndex < targetQuestion.length - 1) {
-      setQuizIndex(quizIndex + 1); 
-    }
-  }
-
 
   const bindingVow = (id, question, choices) => {
     return {
@@ -91,7 +99,7 @@ const playQuiz = () => {
   if (!targetQuiz) return <Text>Quiz not found</Text>;
 
   const numberOfQuestions = targetQuiz.questions.length;
-  const answers = new Array(numberOfQuestions);
+  const [answers, setAnswers] = useState(new Array(numberOfQuestions));
   const pageNum = answers.length;
   
   
@@ -106,22 +114,62 @@ const playQuiz = () => {
     answer = currentAnswer;
   }
 
-  const saveAnswer = () => {
-    let num = currentPage;
-    if (currentPage < pageNum){
-      answers.push({[++num] : answer});
+  function resetAnswers(){
+    setAnswers(new Array(numberOfQuestions));
+    currentPage.current = 0;
+  }
+
+  const saveAnswer = async () => {
+    let num = currentPage.current;
+    if (currentPage.current < pageNum){
+      const updated = [...answers];
+      const myAnswersUpdated = [...myAnswersData];
+      myAnswersUpdated[num] = {answer};
+      updated[num] = {answer};
+      setMyAnswers(myAnswersUpdated);
+      setAnswers(updated);
       answer = null;
-      console.log(answers);
-      currentPage++;
+      console.log(updated);
+      console.log(myAnswersUpdated)
+      await saveAnswersToStorage(updated);
+      currentPage.current++;
+    }
+  }
+
+  function redirect(){
+    console.log('redirect is running');
+    
+    const itemAnswer = [...answers];
+    //const result = itemAnswer.every((item)=>  item !== null);
+    //console.log(result);
+    console.log(itemAnswer[numberOfQuestions-2]);
+    console.log(itemAnswer[numberOfQuestions-1]);
+    if(quizIndex === targetQuestion.length - 1){
+      router.push('/resultQuiz');
     }
   }
 
   const printAnswers = () => { 
     console.log('printButton is pressed')
-    console.log(answers[1])
-    answers.forEach((item)=>{
-      console.log(item);
-    })
+    // const itemToken = answers[0];
+    // console.log(itemToken.answer)
+    // answers.forEach((item)=>{
+    //   const token = item;
+    //   console.log(token.answer)
+    // })
+    console.log(answers);
+    console.log(myAnswersData)
+  }
+
+  const confirmButton = () => {
+    const updated = [...answers];
+  if (quizIndex < targetQuestion.length - 1 && updated[currentPage.current] != null) {
+    setQuizIndex(quizIndex + 1); 
+  }
+  }
+
+  const clearStorage = async () => {
+    await AsyncStorage.removeItem('myAnswers');
   }
 
   return (
@@ -130,7 +178,7 @@ const playQuiz = () => {
       href='/home'
       asChild
       >
-        <Pressable style={webStyles.backButton}>
+        <Pressable style={webStyles.backButton} onPress={()=>{resetAnswers();}}>
           <Text style={webStyles.buttonText}>Back</Text>
         </Pressable>
       </Link>
@@ -161,11 +209,11 @@ const playQuiz = () => {
         {renderQuizCard(targetQuestion[quizIndex].question, targetQuestion[quizIndex].choices)}
         </View>
       </View>
-      <TouchableOpacity style={webStyles.confirmButton} onPress={()=>{confirmButton(); saveAnswer();}} disabled={quizIndex === targetQuestion.length - 1 || answer===null}>
+      <TouchableOpacity style={webStyles.confirmButton} onPress={()=>{confirmButton(); saveAnswer(); redirect()}} disabled={quizIndex === targetQuestion.length || answer===null}>
         <Text style={webStyles.confirmButtonText}>Confirm</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={webStyles.confirmButton} onPress={()=>{printAnswers()}}>
-        <Text>print answers</Text>
+      <TouchableOpacity style={webStyles.confirmButton} onPress={()=>{clearStorage()}}>
+        <Text>clear answers</Text>
       </TouchableOpacity>
     </SafeAreaView>
 

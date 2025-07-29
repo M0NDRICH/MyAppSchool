@@ -1,8 +1,8 @@
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { Appearance } from 'react-native';
+import { Appearance, Platform } from 'react-native';
 
 import { Colors } from '@/constants/Colors';
 import { useEffect } from 'react';
@@ -31,10 +31,12 @@ export default function RootLayout() {
 
   return (
 
-      <><Stack screenOptions={{ headerStyle: { backgroundColor: theme.headerBackground }, headerTintColor: theme.text, headerShadowVisible: false }}>
-      <Stack.Screen name="home" options={{ headerShown: false, title: 'Home'}}/>
+      <><Stack 
+      initialRouteName='index'
+      screenOptions={{ headerStyle: { backgroundColor: theme.headerBackground }, headerTintColor: theme.text, headerShadowVisible: false }}>
+      <Stack.Screen name="quizMenu" options={{ headerShown: false, title: 'landPage'}}/>
       <Stack.Screen name="playQuiz" options={{ headerShown: false, title: 'Home'}}/>
-      <Stack.Screen name="index" options={{ headerShown: false, title: 'landPage' }} />
+      <Stack.Screen name="index" options={{ headerShown: false, title: 'Home' }} />
       <Stack.Screen name="menu" options={{ headerShown: true, title: 'Menu', headerTitle: 'Coffee Shop Menu' }} />
       <Stack.Screen name="contact" options={{ headerShown: true, title: 'Contact', headerTitle: 'Contact Us' }} />
       <Stack.Screen name="+not-found"  options={{headerShown: false}} />
