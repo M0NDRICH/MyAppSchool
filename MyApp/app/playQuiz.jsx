@@ -7,16 +7,17 @@ import { myAnswers } from '@/data/quizAnswers'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 
-let currentPage = useRef(0);
+
 
 const playQuiz = () => {
   const {id} = useLocalSearchParams();
   const [quizzes, setQuizzes] = useState(data);
-  const [myAnswersData, setMyAnswers] = useState(myAnswers);
+  // const [myAnswersData, setMyAnswers] = useState(myAnswers);
   const flatListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [quizIndex, setQuizIndex] = useState(0);
   const router = useRouter();
+  let currentPage = useRef(0);
   let targetQuiz;
   let targetQuestion = [];
   let answer;
@@ -123,16 +124,18 @@ const playQuiz = () => {
     let num = currentPage.current;
     if (currentPage.current < pageNum){
       const updated = [...answers];
-      const myAnswersUpdated = [...myAnswersData];
-      myAnswersUpdated[num] = {answer};
-      updated[num] = {answer};
-      setMyAnswers(myAnswersUpdated);
-      setAnswers(updated);
-      answer = null;
-      console.log(updated);
-      console.log(myAnswersUpdated)
-      await saveAnswersToStorage(updated);
-      currentPage.current++;
+      // const myAnswersUpdated = [...myAnswersData];
+      // myAnswersUpdated[num] = {answer};
+      if(updated[num] === undefined && answer !== undefined){
+        updated[num] = {answer};
+        // setMyAnswers(myAnswersUpdated);
+        setAnswers(updated);
+        num !== targetQuestion.length - 1 && (answer = undefined);
+        console.log(updated);
+        // console.log(myAnswersUpdated)
+        await saveAnswersToStorage(updated);
+        currentPage.current++;
+      }
     }
   }
 
@@ -144,7 +147,8 @@ const playQuiz = () => {
     //console.log(result);
     console.log(itemAnswer[numberOfQuestions-2]);
     console.log(itemAnswer[numberOfQuestions-1]);
-    if(quizIndex === targetQuestion.length - 1){
+    console.log(answer);
+    if(quizIndex === targetQuestion.length - 1 && answer !== undefined){
       router.push('/resultQuiz');
     }
   }
@@ -158,12 +162,14 @@ const playQuiz = () => {
     //   console.log(token.answer)
     // })
     console.log(answers);
-    console.log(myAnswersData)
+    // console.log(myAnswersData)
   }
 
   const confirmButton = () => {
-    const updated = [...answers];
-  if (quizIndex < targetQuestion.length - 1 && updated[currentPage.current] != null) {
+    let num = currentPage.current;
+    const currentAnswer = [...answers];
+    console.log('currentAnswer:'+currentAnswer[num - 1]);
+  if (quizIndex < targetQuestion.length - 1 && answer !== undefined) {
     setQuizIndex(quizIndex + 1); 
   }
   }
