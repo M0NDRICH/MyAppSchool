@@ -21,7 +21,6 @@ const home = () => {
       <Text style={styles.quizText}>Items: {item.questions.length}</Text>
     </Pressable>
     </Link>
-    
   )
 
   return (

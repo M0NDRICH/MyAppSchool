@@ -4,6 +4,8 @@ import { useLocalSearchParams, Link } from 'expo-router'
 import { SafeAreaView } from "react-native-safe-area-context"
 import { data } from '@/data/quizzes'
 
+let currentPage = 0;
+
 const playQuiz = () => {
   const {id} = useLocalSearchParams();
   const [quizzes, setQuizzes] = useState(data);
@@ -12,6 +14,7 @@ const playQuiz = () => {
   const [quizIndex, setQuizIndex] = useState(0);
   let targetQuiz;
   let targetQuestion = [];
+  let answer;
 
   function getQuiz(id){
     return quizzes.find((quiz)=>
@@ -19,19 +22,12 @@ const playQuiz = () => {
     )
   }
 
-  const handleNext = () => {
-  if (currentIndex < targetQuestion.length - 1) {
-    quizIndex = currentIndex + 1;
-    flatListRef.current?.scrollToIndex({ index: newIndex, animated: true });
-    setCurrentIndex(newIndex);
-  }
-  };
-
   const confirmButton = () => {
     if (quizIndex < targetQuestion.length - 1) {
       setQuizIndex(quizIndex + 1); 
     }
   }
+
 
   const bindingVow = (id, question, choices) => {
     return {
@@ -45,30 +41,36 @@ const playQuiz = () => {
     return (
       <>
         {choices.a !== null && (
+          <TouchableOpacity onPress={()=>{ handleAnswer('A')}}>
           <View style={webStyles.quizQuestionChoice}>
-            <Text style={webStyles.quizQuestionChoiceText}>A: {choices.a}</Text>
+              <Text style={webStyles.quizQuestionChoiceText}>A: {choices.a}</Text>
           </View>
+          </TouchableOpacity>
         )}
         {choices.b !== null && (
+          <TouchableOpacity onPress={()=>{ handleAnswer('B')}}>
           <View style={webStyles.quizQuestionChoice}>
-            <Text style={webStyles.quizQuestionChoiceText}>B: {choices.b}</Text>
+              <Text style={webStyles.quizQuestionChoiceText}>B: {choices.b}</Text>
           </View>
+          </TouchableOpacity>
         )}
         {choices.c !== null && (
+          <TouchableOpacity onPress={()=>{ handleAnswer('C')}}>
           <View style={webStyles.quizQuestionChoice}>
-            <Text style={webStyles.quizQuestionChoiceText}>C: {choices.c}</Text>
+              <Text style={webStyles.quizQuestionChoiceText}>C: {choices.c}</Text>
           </View>
+          </TouchableOpacity>
         )}
         {choices.d !== null && (
+          <TouchableOpacity onPress={()=>{ handleAnswer('D')}}>
           <View style={webStyles.quizQuestionChoice}>
-            <Text style={webStyles.quizQuestionChoiceText}>D: {choices.d}</Text>
+              <Text style={webStyles.quizQuestionChoiceText}>D: {choices.d}</Text>
           </View>
+          </TouchableOpacity>
         )}
       </>
     );
   };
-
-  const abc = ['A','B', 'C', 'D'];
 
   const renderQuizCard = (question, choices) => (
 
@@ -87,6 +89,11 @@ const playQuiz = () => {
 
   targetQuiz = getQuiz(id);
   if (!targetQuiz) return <Text>Quiz not found</Text>;
+
+  const numberOfQuestions = targetQuiz.questions.length;
+  const answers = new Array(numberOfQuestions);
+  const pageNum = answers.length;
+  
   
   for(let i = 0; i < targetQuiz.questions.length; i++){
     let question = targetQuiz.questions[i];
@@ -95,7 +102,27 @@ const playQuiz = () => {
     targetQuestion.push(bindingVow( i,question, choices));
   }
 
- console.log(`targetquestion: ${JSON.stringify(targetQuestion[0].choices)}`)
+  function handleAnswer(currentAnswer){
+    answer = currentAnswer;
+  }
+
+  const saveAnswer = () => {
+    let num = currentPage;
+    if (currentPage < pageNum){
+      answers.push({[++num] : answer});
+      answer = null;
+      console.log(answers);
+      currentPage++;
+    }
+  }
+
+  const printAnswers = () => { 
+    console.log('printButton is pressed')
+    console.log(answers[1])
+    answers.forEach((item)=>{
+      console.log(item);
+    })
+  }
 
   return (
     <SafeAreaView style={webStyles.safeContainer}>
@@ -116,26 +143,6 @@ const playQuiz = () => {
             <Text style={webStyles.quizNumOfItemsText}>{targetQuiz.questions.length}</Text>
           </View>
         </View>
-        {/* <View style={webStyles.quizBody}>
-          <View style={webStyles.quizQuestion}>
-            <Text style={webStyles.quizQuestionText}>{"Question Here"}</Text>
-            <Text style={webStyles.quizQuestionText}>{"1 + 1?"}</Text>
-          </View>
-          <View style={webStyles.quizQuestionChoices}>
-            <View style={webStyles.quizQuestionChoice}>
-              <Text style={webStyles.quizQuestionChoiceText}>{"Option 1 here"}</Text>
-            </View>
-            <View style={webStyles.quizQuestionChoice}>
-              <Text style={webStyles.quizQuestionChoiceText}>{"Option 2 here"}</Text>
-            </View>
-            <View style={webStyles.quizQuestionChoice}>
-              <Text style={webStyles.quizQuestionChoiceText}>{"Option 3 here"}</Text>
-            </View>
-            <View style={webStyles.quizQuestionChoice}>
-              <Text style={webStyles.quizQuestionChoiceText}>{"Option 4 here"}</Text>
-            </View>
-          </View>
-        </View> */}
         <View style={[webStyles.quizMainContainer]}>
           {/* <FlatList
           ref={flatListRef}
@@ -153,12 +160,12 @@ const playQuiz = () => {
         /> */}
         {renderQuizCard(targetQuestion[quizIndex].question, targetQuestion[quizIndex].choices)}
         </View>
-        
-        {/* {renderQuizCard(targetQuestion[0].question, targetQuestion[0].choices)}
-         */}
       </View>
-      <TouchableOpacity style={webStyles.confirmButton} onPress={confirmButton} disabled={quizIndex === targetQuestion.length - 1}>
+      <TouchableOpacity style={webStyles.confirmButton} onPress={()=>{confirmButton(); saveAnswer();}} disabled={quizIndex === targetQuestion.length - 1 || answer===null}>
         <Text style={webStyles.confirmButtonText}>Confirm</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={webStyles.confirmButton} onPress={()=>{printAnswers()}}>
+        <Text>print answers</Text>
       </TouchableOpacity>
     </SafeAreaView>
 
@@ -237,7 +244,7 @@ const webStyles = StyleSheet.create({
     fontSize: 16,
   },
   quizMainContainer: {
-    width: 250,
+    width: '80%',
     height: 500,
     backgroundColor: 'purple',
   },
@@ -248,7 +255,7 @@ const webStyles = StyleSheet.create({
     backgroundColor: 'aquamarine',
   },
   quizBodyContainer: {
-    width: 250,
+    width: '100%',
   },
   quizQuestion: {
     backgroundColor: 'white',
