@@ -2,7 +2,6 @@ import { View, Text, StyleSheet, ImageBackground, Image, SafeAreaView, Touchable
 import { useRouter, Link } from 'expo-router';
 
 import React from 'react'
-import icedCoffeeImg from "@/assets/images/iced-coffee.png"
 import manImg from "@/assets/images/man-pointing.png"
 import paperImg from "@/assets/images/paper.png"
 

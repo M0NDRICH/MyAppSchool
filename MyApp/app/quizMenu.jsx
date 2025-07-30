@@ -112,6 +112,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 5,
     backgroundColor: '#BDDDE4',
+    marginBottom: 10,
   },
   quizText: {
     color: '#3C2F60',

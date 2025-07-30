@@ -36,6 +36,7 @@ export default function RootLayout() {
       screenOptions={{ headerStyle: { backgroundColor: theme.headerBackground }, headerTintColor: theme.text, headerShadowVisible: false }}>
       <Stack.Screen name="quizMenu" options={{ headerShown: false, title: 'LandPage'}}/>
       <Stack.Screen name="playQuiz" options={{ headerShown: false, title: 'PlayQuiz'}}/>
+      <Stack.Screen name="addQuiz" options={{ headerShown: false, title: 'AddQuiz'}}/>
       <Stack.Screen name="index" options={{ headerShown: false, title: 'index' }} />
       <Stack.Screen name="menu" options={{ headerShown: true, title: 'Menu', headerTitle: 'Coffee Shop Menu' }} />
       <Stack.Screen name="contact" options={{ headerShown: true, title: 'Contact', headerTitle: 'Contact Us' }} />

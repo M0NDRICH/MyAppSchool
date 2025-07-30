@@ -22,6 +22,8 @@ const playQuiz = () => {
   let targetQuestion = [];
   let answer;
 
+  const styles = Platform.OS === 'web' ? webStyles : mobileStyles;
+
   const saveAnswersToStorage = async (answers) => {
     try {
       await AsyncStorage.setItem('myAnswers', JSON.stringify(answers));
@@ -51,29 +53,29 @@ const playQuiz = () => {
       <>
         {choices.a !== null && (
           <TouchableOpacity onPress={()=>{ handleAnswer('A')}}>
-          <View style={webStyles.quizQuestionChoice}>
-              <Text style={webStyles.quizQuestionChoiceText}>A: {choices.a}</Text>
+          <View style={styles.quizQuestionChoice}>
+              <Text style={styles.quizQuestionChoiceText}>A: {choices.a}</Text>
           </View>
           </TouchableOpacity>
         )}
         {choices.b !== null && (
           <TouchableOpacity onPress={()=>{ handleAnswer('B')}}>
-          <View style={webStyles.quizQuestionChoice}>
-              <Text style={webStyles.quizQuestionChoiceText}>B: {choices.b}</Text>
+          <View style={styles.quizQuestionChoice}>
+              <Text style={styles.quizQuestionChoiceText}>B: {choices.b}</Text>
           </View>
           </TouchableOpacity>
         )}
         {choices.c !== null && (
           <TouchableOpacity onPress={()=>{ handleAnswer('C')}}>
-          <View style={webStyles.quizQuestionChoice}>
-              <Text style={webStyles.quizQuestionChoiceText}>C: {choices.c}</Text>
+          <View style={styles.quizQuestionChoice}>
+              <Text style={styles.quizQuestionChoiceText}>C: {choices.c}</Text>
           </View>
           </TouchableOpacity>
         )}
         {choices.d !== null && (
           <TouchableOpacity onPress={()=>{ handleAnswer('D')}}>
-          <View style={webStyles.quizQuestionChoice}>
-              <Text style={webStyles.quizQuestionChoiceText}>D: {choices.d}</Text>
+          <View style={styles.quizQuestionChoice}>
+              <Text style={styles.quizQuestionChoiceText}>D: {choices.d}</Text>
           </View>
           </TouchableOpacity>
         )}
@@ -83,13 +85,13 @@ const playQuiz = () => {
 
   const renderQuizCard = (question, choices) => (
 
-     <View style={webStyles.quizBody}>
-      <View style={webStyles.quizBodyContainer}>
-        <View style={webStyles.quizQuestion}>
-          <Text style={webStyles.quizQuestionText}>{'Question:'}</Text>
-          <Text style={webStyles.quizQuestionText}>{question}</Text>
+     <View style={styles.quizBody}>
+      <View style={styles.quizBodyContainer}>
+        <View style={styles.quizQuestion}>
+          <Text style={styles.quizQuestionText}>{'Question:'}</Text>
+          <Text style={styles.quizQuestionText}>{question}</Text>
         </View>
-        <View style={webStyles.quizQuestionChoices}>
+        <View style={styles.quizQuestionChoices}>
           {renderChoices(choices)}
         </View>
       </View>
@@ -153,18 +155,6 @@ const playQuiz = () => {
     }
   }
 
-  const printAnswers = () => { 
-    console.log('printButton is pressed')
-    // const itemToken = answers[0];
-    // console.log(itemToken.answer)
-    // answers.forEach((item)=>{
-    //   const token = item;
-    //   console.log(token.answer)
-    // })
-    console.log(answers);
-    // console.log(myAnswersData)
-  }
-
   const confirmButton = () => {
     let num = currentPage.current;
     const currentAnswer = [...answers];
@@ -179,47 +169,30 @@ const playQuiz = () => {
   }
 
   return (
-    <SafeAreaView style={webStyles.safeContainer}>
+    <SafeAreaView style={styles.safeContainer}>
       <Link
-      href='/home'
+      href='/quizMenu'
       asChild
       >
-        <Pressable style={webStyles.backButton} onPress={()=>{resetAnswers();}}>
-          <Text style={webStyles.buttonText}>Back</Text>
+        <Pressable style={styles.backButton} onPress={()=>{resetAnswers();}}>
+          <Text style={styles.buttonText}>Back</Text>
         </Pressable>
       </Link>
-      <View style={webStyles.quizCard}>
-        <View style={webStyles.quizHeader}>
-          <View style={webStyles.quizTitle}>
-            <Text style={webStyles.quizTitleText}>{targetQuiz.title}</Text>
+      <View style={styles.quizCard}>
+        <View style={styles.quizHeader}>
+          <View style={styles.quizTitle}>
+            <Text style={styles.quizTitleText}>{targetQuiz.title}</Text>
           </View>
-          <View style={webStyles.quizNumOfItems}>
-            <Text style={webStyles.quizNumOfItemsText}>{targetQuiz.questions.length}</Text>
+          <View style={styles.quizNumOfItems}>
+            <Text style={styles.quizNumOfItemsText}>{targetQuiz.questions.length}</Text>
           </View>
         </View>
-        <View style={[webStyles.quizMainContainer]}>
-          {/* <FlatList
-          ref={flatListRef}
-          horizontal
-          pagingEnabled
-          scrollEnabled={true}
-          showsHorizontalScrollIndicator={false}
-          data={targetQuestion}
-          keyExtractor={(quiz)=>quiz.id.toString()}
-          initialScrollIndex={currentIndex}
-          ListEmptyComponent={<Text>No Items</Text>}
-          renderItem={({item}) => (
-            renderQuizCard(item.question, item.choices)
-          )}
-        /> */}
+        <View style={[styles.quizMainContainer]}>
         {renderQuizCard(targetQuestion[quizIndex].question, targetQuestion[quizIndex].choices)}
         </View>
       </View>
-      <TouchableOpacity style={webStyles.confirmButton} onPress={()=>{confirmButton(); saveAnswer(); redirect()}} disabled={quizIndex === targetQuestion.length || answer===null}>
-        <Text style={webStyles.confirmButtonText}>Confirm</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={webStyles.confirmButton} onPress={()=>{clearStorage()}}>
-        <Text>clear answers</Text>
+      <TouchableOpacity style={styles.confirmButton} onPress={()=>{confirmButton(); saveAnswer(); redirect()}} disabled={quizIndex === targetQuestion.length || answer===null}>
+        <Text style={styles.confirmButtonText}>Confirm</Text>
       </TouchableOpacity>
     </SafeAreaView>
 
@@ -315,6 +288,136 @@ const webStyles = StyleSheet.create({
     backgroundColor: 'white',
     width: '100%',
     height: 250,
+    borderRadius: 8,
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    gap: 10,
+  },
+  quizQuestionText: {
+    color: '#3C2F60',
+    fontWeight: 'bold',
+    fontSize: 24,
+  },
+  quizQuestionChoices: {
+    flexDirection: 'column',
+    width: '100%',
+    height: '60%',
+    justifyContent: 'space-around',
+  },
+  quizQuestionChoice: {
+    backgroundColor: 'white',
+    width: '100%',
+    borderRadius: 8,
+    padding: 10,
+  },
+  quizQuestionChoiceText: {
+    color: '#3C2F60',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  confirmButton: {
+    backgroundColor: '#9EC6F3',
+    width: '70%',
+    marginTop: 10,
+    paddingVertical: 25,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  confirmButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  }
+});
+
+const mobileStyles = StyleSheet.create({
+  safeContainer: {
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#FFF1D5',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    backgroundColor: '#9EC6F3',
+    width: '25%',
+    height: 50,
+    borderRadius: 8,
+    marginTop: '5%',
+    marginLeft: '5%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    color: 'white'
+  },
+  quizCard: {
+    marginTop: 10,
+    flexDirection: 'column',
+    alignItems: 'center',
+    backgroundColor: '#BDDDE4',
+    width: '90%',
+    height: '70%',
+    borderRadius: 8,
+  },
+  quizHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    height: 50,
+    width: '80%',
+    marginVertical: 10,
+  },
+  quizTitle: {
+    backgroundColor: 'white',
+    maxWidth: 500,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  quizTitleText: {
+    color: '#3C2F60',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  quizNumOfItems: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    width: '25%',
+    borderRadius: 8,
+  },
+  quizNumOfItemsText: {
+    color: '#3C2F60',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  quizMainContainer: {
+    width: '90%',
+    height: 500,
+  },
+  quizBody: {
+    width: '100%',
+    maxHeight: 300,
+    borderRadius: 8,
+  },
+  quizBodyContainer: {
+    width: '100%',
+  },
+  quizQuestion: {
+    backgroundColor: 'white',
+    width: '100%',
+    height: 200,
     borderRadius: 8,
     flexDirection: 'column',
     justifyContent: 'flex-start',

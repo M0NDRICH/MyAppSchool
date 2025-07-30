@@ -13,72 +13,44 @@ const resultQuiz = () => {
   const [quizzes, setQuizzes] = useState(data);
   const {id} = useLocalSearchParams();
   const  [myAnswersData, setMyAnswersData]  = useState([]);
-  const score = 0;
+  const [score, setScore] = useState(0);
   const targetQuiz = getQuiz(id);
   const correctAnswers = targetQuiz.correctAnswers;
   const [correctAnsState, setCorrectAnsState] = useState(correctAnswers)
-  let correctAnswersArr = extractAnswer(correctAnsState);
+  let correctAnswersArr = extractCorrectAnswer(correctAnsState);
   // let userAnswerArr;
   const [userAnswerArr, setUserAnswerArr] = useState([]);
 
-
-  // const   = () => {
-  //   const corAns = [...correctAnswers];
-
-  //   // corAns.forEach((item)=>{
-  //   //   var ans = {"answer":};
-  //   // })
-    
-  // }
-
-  function extractAnswer(ans){
+  function extractCorrectAnswer(ans){
     const letterArr = ['a', 'b', 'c', 'd'];
     const arr = ans;
     let result = [];
 
-    // const foundLetter = letterArr.find(letter => letter >= ans);
-
-    // return foundLetter;
-
     arr.forEach((ans)=>{
       letterArr.forEach((letter)=>{
         if (ans[letter] !== null && ans[letter] !== undefined){
-          result.push((ans[letter]).toString());
+          // result.push((ans[letter]).toString());
+          result.push((letter).toUpperCase());
         }
       })
     })
     return result;
   }
-  console.log(extractAnswer(correctAnswers));
+  console.log(extractCorrectAnswer(correctAnswers));
 
-  // const evaluateAnswer = () => {
-    // const userAnsDataArr = [...myAnswersData];
-    // const correctAnsDataArr = [...correctAnsState]
-    // const userAnswer = extractAnswer(userAnsDataArr);
-    // const correctAnswer = extractAnswer(correctAnsDataArr);
+  function extractUserAnswer(ans){
+    const arr = ans;
+    let result = [];
 
-    // correctAnswer.forEach((corrArgs)=>{
-    //   userAnswer.forEach((userAnsArgs)=>{
-    //     corrArgs === userAnsArgs ? score += 1 : score += 0;
-    //     console.log(corrArgs === userAnsArgs);
-    //   })
-    // })
-    
-    // // console.log('quiz score'+score);
-    // console.log(userAnswer);
-    // console.log(correctAnswers);
-    // console.log(userAnswer[0] === correctAnswer[0]);
-  // }
+    arr.forEach((ans)=>{
+      if(ans.answer !== null && ans.answer !== undefined){
+        result.push((ans.answer).toString());
+      }
+    })
 
-  // const usersAnswer=[...myAnswersData]
-  // console.log(correctAnswers);
-  // console.log(usersAnswer);
-  // const sample1 = {"d":"dog"};
-  // const sample2 = {"d":"dog"};
-
-  // console.log(sample1.d === sample2.d ? 'same' : 'not same');
-  
-  // console.log('try sample finding letter d '+ '' + assignLetterOfCorrectAnswer());
+    console.log(result);
+    return result;
+  }
 
   useEffect(() => {
     const fetchAnswers = async () => {
@@ -88,11 +60,6 @@ const resultQuiz = () => {
         if (jsonValue !== null){
           const parsed = JSON.parse(jsonValue);
           setMyAnswersData(JSON.parse(jsonValue));
-          console.log('Parsed:', parsed); 
-          const arrSample = [...myAnswersData]
-          userAnswerArr = extractAnswer(arrSample)
-          console.log('myAnswersData '+ myAnswersData )
-          console.log(userAnswerArr);
         }
       } catch (error) {
         console.error('Error loading answers:', error);
@@ -102,19 +69,10 @@ const resultQuiz = () => {
     fetchAnswers();
   }, []);
 
-  // useEffect(()=>{
-
-  //     if (myAnswersData.length !== 0 && myAnswersData.length >0 ) {
-  //     const arrSample = [...myAnswersData]
-  //     userAnswerArr = extractAnswer(arrSample);
-  //     console.log('extracted array '+ userAnswerArr);
-  //     evaluateAnswer(userAnswerArr);
-  //     }
-
-  // }, [myAnswersData])
   useEffect(() => {
     if (myAnswersData.length > 0) {
-      const extracted = extractAnswer(myAnswersData);
+      const arr = [...myAnswersData]
+      const extracted = extractUserAnswer(arr);
       setUserAnswerArr(extracted);
       console.log('Extracted user answers:', extracted);
       evaluateAnswer(extracted);
@@ -132,36 +90,24 @@ const resultQuiz = () => {
     )
   }
 
-  // function evaluateAnswers(){
-  //   correctAnswers.forEach((correctAns)=>{
-  //     console.log(correctAns);
-  //     const userAnswers = [...myAnswers];
-  //     userAnswers.forEach((userAns)=>{
-  //       correctAns === userAns ? console.log('correct') : console.log('wrong');
-  //     })
-  //   })
-
-  // };
-  // function evaluateAnswers() {
-  //   const userAnswers = [...myAnswers];
-  //   correctAnswers.map((correctAns) => {
-  //     const result = userAnswers.map((userAns) => correctAns === userAns ? 'correct' : 'wrong');
-  //     console.log(result);
-  //   });
-  // }
-
   const evaluateAnswer = (userAnswerArr) => {
-    const correctAnswerArr = extractAnswer(correctAnswers);
-    let score = 0;
+    const correctAnswerArr = extractCorrectAnswer(correctAnswers);
+    let tempScore = 0;
 
     userAnswerArr.forEach((userAns, index) => {
       if (userAns === correctAnswerArr[index]) {
-        score++;
+        ++tempScore;
       }
     });
 
-    console.log(`Final score: ${score}/${correctAnswerArr.length}`);
+    console.log(`Final score: ${tempScore}/${correctAnswerArr.length}`);
+    setScore(tempScore)
   };
+
+  const clearStorage = async () => {
+    await AsyncStorage.removeItem('myAnswers');
+  }
+  
 
 
   return (
@@ -170,20 +116,20 @@ const resultQuiz = () => {
       href='/playQuiz'
       asChild
       >
-        <TouchableOpacity style={styles.backButton}>
+        <TouchableOpacity style={styles.backButton} onPress={clearStorage}>
           <Text style={styles.buttonText}>Back</Text>
         </TouchableOpacity>
       </Link>
       <View style={styles.resultCard}>
         <View style={styles.resultCardMainBody}>
           <Text style={styles.resultTextTitle}>Result:</Text>
-          <Text style={styles.resultText}>Your Score is 5/5!</Text>
+          <Text style={styles.resultText}>Your Score is {score}/{correctAnsState.length}!</Text>
         </View>
         <TouchableOpacity onPress={()=>{ printAnswers();}} style={styles.buttonReviewAnswers}>
           <Text style={styles.buttonText}>View Answers</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.okButton}>
+      <TouchableOpacity style={styles.okButton} onPress={clearStorage}>
         <Text style={styles.buttonText}>OK</Text>
       </TouchableOpacity>
     </SafeAreaView>
