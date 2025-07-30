@@ -149,7 +149,7 @@ const playQuiz = () => {
     console.log(itemAnswer[numberOfQuestions-1]);
     console.log(answer);
     if(quizIndex === targetQuestion.length - 1 && answer !== undefined){
-      router.push('/resultQuiz');
+      router.push(`/resultQuiz?id=${encodeURIComponent(id)}`);
     }
   }
 
