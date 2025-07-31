@@ -159,9 +159,9 @@ const playQuiz = () => {
     let num = currentPage.current;
     const currentAnswer = [...answers];
     console.log('currentAnswer:'+currentAnswer[num - 1]);
-  if (quizIndex < targetQuestion.length - 1 && answer !== undefined) {
-    setQuizIndex(quizIndex + 1); 
-  }
+    if (quizIndex < targetQuestion.length - 1 && answer !== undefined) {
+      setQuizIndex(quizIndex + 1); 
+    }
   }
 
   const clearStorage = async () => {

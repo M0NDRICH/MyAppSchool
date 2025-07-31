@@ -4,7 +4,8 @@ import { Link } from 'expo-router'
 import React, { useState, useEffect } from 'react'
 
 const addQuiz = () => {
-  const styles = Platform.OS === 'web' ? webStyles : mobileStyles;
+  // const styles = Platform.OS === 'web' ? webStyles : mobileStyles;
+  const styles = webStyles;
   const [quizToken,                   setQuizToken] = useState([]);
   const [inputQuestionValue, setInputQuestionValue] = useState('');
   const [inputTitleValue,       setInputTitleValue] = useState('');
