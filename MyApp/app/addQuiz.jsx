@@ -13,7 +13,6 @@ const addQuiz = () => {
   const [inputBValue,               setInputBValue] = useState('');
   const [inputCValue,               setInputCValue] = useState('');
   const [inputDValue,               setInputDValue] = useState('');
-  const quizArray = [...quizToken];
 
   const sampleQuestionToken = {
     "id": 0,
@@ -32,17 +31,17 @@ const addQuiz = () => {
     console.log('edit card is running '+ id)
   }
 
-  const renderItem = ({card}) => (
+  const renderItem = ({item}) => (
     <View style={styles.questionCard}
-    key={sampleQuestionToken.id}
-    onPress={()=> editCard(id)}
+    key={item.id}
+    onPress={()=> editCard(item.id)}
     >
       <View style={styles.question}>
         <Text style={[styles.questionText, styles.textPrimary]}>Question: </Text>
         <TextInput
         style={[styles.textSecondary, styles.questionInputText]}
-        placeholder='Type the question here...'
-        value={inputQuestionValue}
+        value={item.question}
+        editable={false}
         onChangeText={text => setInputQuestionValue(text)}
         />
       </View>
@@ -52,7 +51,8 @@ const addQuiz = () => {
           <TextInput
           style={[styles.textSecondary, styles.choiceInputField]}
           placeholder='Type text here for A...'
-          value={inputAValue}
+          value={item.A}
+          editable={false}
           onChangeText={text => setInputAValue(text)}
           />
         </View>
@@ -60,8 +60,8 @@ const addQuiz = () => {
           <Text style={styles.textPrimary}>B: </Text>
           <TextInput
           style={[styles.textSecondary, styles.choiceInputField]}
-          placeholder='Type text here for B...'
-          value={inputBValue}
+          value={item.B}
+          editable={false}
           onChangeText={text => setInputBValue(text)}
           />
         </View>
@@ -69,8 +69,8 @@ const addQuiz = () => {
           <Text style={styles.textPrimary}>C: </Text>
           <TextInput
           style={[styles.textSecondary, styles.choiceInputField]}
-          placeholder='Type text here for C...'
-          value={inputCValue}
+          value={item.C}
+          editable={false}
           onChangeText={text => setInputCValue(text)}
           />
         </View>
@@ -78,14 +78,65 @@ const addQuiz = () => {
           <Text style={styles.textPrimary}>D: </Text>
           <TextInput
           style={[styles.textSecondary, styles.choiceInputField]}
-          placeholder='Type text here for D...'
-          value={inputDValue}
+          value={item.D}
+          editable={false}
           onChangeText={text => setInputDValue(text)}
           />
         </View>
       </View>
     </View>
   )
+
+  const resetInputValues = () => {
+    setInputQuestionValue('');
+    setInputAValue('');
+    setInputBValue('');
+    setInputCValue('');
+    setInputDValue('');
+  }
+
+  const addNewQuestionToken = () => {
+    const question = inputQuestionValue;
+    const choiceA = inputAValue;
+    const choiceB =  inputBValue;
+    const choiceC = inputCValue;
+    const choiceD = inputDValue;
+
+    const choices = {
+      "a": choiceA,
+      "b": choiceB,
+      "c": choiceC,
+      "d": choiceD,
+    };
+
+    // const id = [...quizToken].length === 0 && 0;
+    let id;
+    if (quizToken.length === 0)
+    {
+      id = 0;
+    }
+    else if (quizToken.length > 0)
+    {
+      id = Number(quizToken.length);
+    }
+
+    const newQuizToken = {
+      "id": id,
+      "question": question,
+      "A":choiceA,
+      "B":choiceB,
+      "C":choiceC,
+      "D":choiceD,
+    }
+
+    addNewQuizToken(newQuizToken);
+    resetInputValues();
+    console.log(quizToken)
+  }
+
+  const tryPrint = () => {
+    console.log(quizToken);
+  }
 
   return (
     <SafeAreaView style={styles.safeContainer}>
@@ -106,7 +157,12 @@ const addQuiz = () => {
           />
         </View>
         <View style={styles.questionContainer}>
-          {/* <FlatList/> */}
+          <FlatList
+          style={styles.quizTokenContainer}
+          data={quizToken}
+          renderItem={renderItem}
+          keyExtractor={quizToken => quizToken.id}
+          />
           <View style={styles.questionCard}
           key={sampleQuestionToken.id}
           onPress={()=> editCard(id)}
@@ -159,16 +215,15 @@ const addQuiz = () => {
               </View>
             </View>
           </View>
-          <TouchableOpacity style={styles.addNewButton}>
+          <TouchableOpacity style={styles.addNewButton} onPress={()=>{addNewQuestionToken()}}>
             <Text style={[styles.textPrimary, styles.saveButtonText]}>Add new question</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.saveButton}>
+        <TouchableOpacity style={styles.saveButton} onPress={()=>{tryPrint()}}>
           <Text style={[styles.textPrimary, styles.saveButtonText]}> Save </Text>
         </TouchableOpacity>
       </View>
     </SafeAreaView>
-
   )
 }
 
@@ -239,6 +294,7 @@ const webStyles = StyleSheet.create({
     width: '100%',
   },
   questionContainer: {
+    position: 'relative',
     backgroundColor: 'white',
     width: '80%',
     height: '55%',
@@ -248,6 +304,10 @@ const webStyles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 10,
     marginVertical: 10,
+  },
+  quizTokenContainer: {
+    width: '100%',
+    height: '20%',
   },
   questionCard: {
     backgroundColor: '#BDDDE4',
@@ -287,6 +347,8 @@ const webStyles = StyleSheet.create({
     width: '100%',
   },
   addNewButton: {
+    position: 'absolute',
+    bottom: 10,
     backgroundColor: '#9EC6F3',
     borderRadius: 8,
     width: '30%',
