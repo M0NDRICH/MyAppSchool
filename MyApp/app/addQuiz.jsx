@@ -15,6 +15,7 @@ const addQuiz = () => {
   const [inputDValue,               setInputDValue] = useState('');
 
   const sampleQuestionToken = {
+    "type":"proxyToken",
     "id": 0,
     "question":"What does the fox says?",
     "A":"fox fox fox fooox",
@@ -27,14 +28,18 @@ const addQuiz = () => {
     setQuizToken(prev => [...prev, newItem]);
   }
 
+  useEffect(()=>{
+    addNewQuizToken(sampleQuestionToken);
+  }, []);
+
   const editCard = (id) => {
     console.log('edit card is running '+ id)
   }
 
+  /*
   const renderItem = ({item}) => (
     <View style={styles.questionCard}
     key={item.id}
-    onPress={()=> editCard(item.id)}
     >
       <View style={styles.question}>
         <Text style={[styles.questionText, styles.textPrimary]}>Question: </Text>
@@ -85,7 +90,136 @@ const addQuiz = () => {
         </View>
       </View>
     </View>
-  )
+  )*/
+
+  const renderItem = ({item}) => {
+    if (item.type === 'proxyToken')
+    {
+      return <View style={styles.questionCard}
+              key={item.id}
+              onPress={()=> editCard(id)}
+              >
+                <View style={styles.numOfCard}>
+                  <Text style={styles.textPrimary}>#{Number(item.id)}</Text>
+                </View>
+                <View style={styles.question}>
+                  <Text style={[styles.textPrimary]}>Question: </Text>
+                  <TextInput
+                  style={[styles.textSecondary, styles.questionInputText]}
+                  placeholder='Type the question here...'
+                  value={inputQuestionValue}
+                  onChangeText={text => setInputQuestionValue(text)}
+                  />
+                </View>
+                <View style={styles.questionChoices}>
+                  <View style={styles.choiceLetter}>
+                    <Text style={styles.textPrimary}>A: </Text>
+                    <TextInput
+                    style={[styles.textSecondary, styles.choiceInputField]}
+                    placeholder='Type text here for A...'
+                    value={inputAValue}
+                    onChangeText={text => setInputAValue(text)}
+                    />
+                  </View>
+                  <View style={styles.choiceLetter}>
+                    <Text style={styles.textPrimary}>B: </Text>
+                    <TextInput
+                    style={[styles.textSecondary, styles.choiceInputField]}
+                    placeholder='Type text here for B...'
+                    value={inputBValue}
+                    onChangeText={text => setInputBValue(text)}
+                    />
+                  </View>
+                  <View style={styles.choiceLetter}>
+                    <Text style={styles.textPrimary}>C: </Text>
+                    <TextInput
+                    style={[styles.textSecondary, styles.choiceInputField]}
+                    placeholder='Type text here for C...'
+                    value={inputCValue}
+                    onChangeText={text => setInputCValue(text)}
+                    />
+                  </View>
+                  <View style={styles.choiceLetter}>
+                    <Text style={styles.textPrimary}>D: </Text>
+                    <TextInput
+                    style={[styles.textSecondary, styles.choiceInputField]}
+                    placeholder='Type text here for D...'
+                    value={inputDValue}
+                    onChangeText={text => setInputDValue(text)}
+                    />
+                  </View>
+                </View>
+              </View>
+    } 
+    else 
+    {
+      return <View style={styles.questionCard}
+              key={item.id}
+              >
+                <View style={styles.questionCardHeader}>
+                  <View style={styles.numOfCard}>
+                    <Text style={styles.textPrimary}>#{Number(item.id)}</Text>
+                  </View>
+                  <View style={styles.rightSideHeader}>
+                    <TouchableOpacity style={styles.editButton}>
+                      <Text>E</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.deleteButton}>
+                      <Text>D</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+                <View style={styles.question}>
+                  <Text style={[styles.questionText, styles.textPrimary]}>Question: </Text>
+                  <TextInput
+                  style={[styles.textSecondary, styles.questionInputText]}
+                  value={item.question}
+                  editable={false}
+                  onChangeText={text => setInputQuestionValue(text)}
+                  />
+                </View>
+                <View style={styles.questionChoices}>
+                  <View style={styles.choiceLetter}>
+                    <Text style={styles.textPrimary}>A: </Text>
+                    <TextInput
+                    style={[styles.textSecondary, styles.choiceInputField]}
+                    placeholder='Type text here for A...'
+                    value={item.A}
+                    editable={false}
+                    onChangeText={text => setInputAValue(text)}
+                    />
+                  </View>
+                  <View style={styles.choiceLetter}>
+                    <Text style={styles.textPrimary}>B: </Text>
+                    <TextInput
+                    style={[styles.textSecondary, styles.choiceInputField]}
+                    value={item.B}
+                    editable={false}
+                    onChangeText={text => setInputBValue(text)}
+                    />
+                  </View>
+                  <View style={styles.choiceLetter}>
+                    <Text style={styles.textPrimary}>C: </Text>
+                    <TextInput
+                    style={[styles.textSecondary, styles.choiceInputField]}
+                    value={item.C}
+                    editable={false}
+                    onChangeText={text => setInputCValue(text)}
+                    />
+                  </View>
+                  <View style={styles.choiceLetter}>
+                    <Text style={styles.textPrimary}>D: </Text>
+                    <TextInput
+                    style={[styles.textSecondary, styles.choiceInputField]}
+                    value={item.D}
+                    editable={false}
+                    onChangeText={text => setInputDValue(text)}
+                    />
+                  </View>
+                </View>
+              </View>
+    }
+  }
 
   const resetInputValues = () => {
     setInputQuestionValue('');
@@ -121,6 +255,7 @@ const addQuiz = () => {
     }
 
     const newQuizToken = {
+      "type":"token",
       "id": id,
       "question": question,
       "A":choiceA,
@@ -163,7 +298,7 @@ const addQuiz = () => {
           renderItem={renderItem}
           keyExtractor={quizToken => quizToken.id}
           />
-          <View style={styles.questionCard}
+          {/* <View style={styles.questionCard}
           key={sampleQuestionToken.id}
           onPress={()=> editCard(id)}
           >
@@ -214,14 +349,16 @@ const addQuiz = () => {
                 />
               </View>
             </View>
-          </View>
-          <TouchableOpacity style={styles.addNewButton} onPress={()=>{addNewQuestionToken()}}>
-            <Text style={[styles.textPrimary, styles.saveButtonText]}>Add new question</Text>
-          </TouchableOpacity>
+          </View> */}
         </View>
-        <TouchableOpacity style={styles.saveButton} onPress={()=>{tryPrint()}}>
-          <Text style={[styles.textPrimary, styles.saveButtonText]}> Save </Text>
-        </TouchableOpacity>
+        <View style={styles.buttonArea}>
+            <TouchableOpacity style={styles.addNewButton} onPress={()=>{addNewQuestionToken()}}>
+              <Text style={[styles.textPrimary, styles.saveButtonText]}>Add new question</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.saveButton} onPress={()=>{tryPrint()}}>
+              <Text style={[styles.textPrimary, styles.saveButtonText]}> Save </Text>
+            </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   )
@@ -305,6 +442,39 @@ const webStyles = StyleSheet.create({
     paddingHorizontal: 10,
     marginVertical: 10,
   },
+  numOfCard: {
+    alignSelf: 'flex-start',
+    marginLeft: 15,
+    backgroundColor: 'white',
+    borderRadius: 8,
+  },
+  questionCardHeader: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  rightSideHeader: {
+    width: '15%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginRight: 15,
+  },
+  editButton: {
+    backgroundColor: "#9EC6F3",
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  deleteButton: {
+    backgroundColor: "#9EC6F3",
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
   quizTokenContainer: {
     width: '100%',
     height: '20%',
@@ -315,7 +485,7 @@ const webStyles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 8,
     width: '95%',
-    height: '85%',
+    height: '100%',
     alignItems: 'center',
   },
   question: {
@@ -346,15 +516,17 @@ const webStyles = StyleSheet.create({
     paddingHorizontal: 10,
     width: '100%',
   },
+  buttonArea: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
   addNewButton: {
-    position: 'absolute',
-    bottom: 10,
     backgroundColor: '#9EC6F3',
     borderRadius: 8,
     width: '30%',
     justifyContent: 'center',
     alignItems: 'center',
-    marginVertical: 10,
   },
   saveButton: {
     backgroundColor: '#9EC6F3',
