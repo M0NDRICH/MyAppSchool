@@ -66,15 +66,28 @@ const addQuiz = () => {
     setInputDValue(item.D);
   }
 
-  const saveEdittedToken = (id) => {
+  const saveEdittedToken = (id, mode) => {
     const targetQuiz = quizToken[id];
 
-    targetQuiz.question = inputQuestionValue;
-    targetQuiz.editable = false;
-    targetQuiz.A        = inputAValue;
-    targetQuiz.B        = inputBValue;
-    targetQuiz.C        = inputCValue;
-    targetQuiz.D        = inputDValue;
+    if (mode === 'Edit')
+    {
+      targetQuiz.question = inputQuestionValue;
+      targetQuiz.editable = false;
+      targetQuiz.A        = inputAValue;
+      targetQuiz.B        = inputBValue;
+      targetQuiz.C        = inputCValue;
+      targetQuiz.D        = inputDValue;
+    } 
+    else if (mode === 'Cancel')
+    {
+      targetQuiz.question;
+      targetQuiz.editable;
+      targetQuiz.A;
+      targetQuiz.B;
+      targetQuiz.C;
+      targetQuiz.D;
+    } 
+    
   }
 
   const editQuestionToken = (id) => {
@@ -95,12 +108,22 @@ const addQuiz = () => {
     }
     else if (toggleButton === 'Off')
     {
-      saveEdittedToken(id);
+      saveEdittedToken(id, "Edit");
       resetInputValues();
       disableProxy();
       setToggleButton('On');
     }
     
+  }
+
+  const cancelEditToken = (id) => {
+    const targetQuizToken = quizToken[id];
+    disableProxy();
+    assignValuesToTextFields(targetQuizToken);
+    saveEdittedToken(id, "Cancel");
+    resetInputValues();
+    targetQuizToken.editable = false;
+    setToggleButton('On');
   }
   
   const deleteQuestionToken = (id) => {
@@ -245,7 +268,7 @@ const addQuiz = () => {
     } 
     else 
     {
-      return <View style={styles.questionCard}
+      return <View style={[styles.questionCard, toggleButton === 'Off' && styles.editMode]}
               key={item.id}
               >
                 <View style={styles.questionCardHeader}>
@@ -254,16 +277,24 @@ const addQuiz = () => {
                   </View>
                   <View style={styles.rightSideHeader}>
                     <TouchableOpacity
-                     style={styles.editButton}
+                     style={[styles.editButton, toggleButton === 'Off' && styles.editModeButton]}
                      onPress={()=>{editQuestionToken(item.id)}}>
                       {/* <Text>{toggleButton === 'On' ? 'E' : 'S'}</Text> */}
                       <MaterialIcons
-                      name={toggleButton === 'On' ? 'edit' : 'check'} size={24} color='black'/>
+                      name={toggleButton === 'On' ? 'edit' : 'check'} 
+                      size={24} 
+                      color='black'
+                      selectable={undefined}/>
                     </TouchableOpacity>
                     <TouchableOpacity
-                     style={styles.deleteButton}
-                     onPress={()=>{deleteQuestionToken(item.id)}}>
-                      <MaterialIcons name="clear" size={24} color="red" selectable={undefined}/>
+                     style={[styles.deleteButton, toggleButton === 'Off' && styles.editModeButton]}
+                     onPress=
+                     {()=>{if (toggleButton === 'On') {deleteQuestionToken(item.id);} else { cancelEditToken(item.id);}}}>
+                      <MaterialIcons 
+                      name={toggleButton === 'On' ? "delete" : "clear" } 
+                      size={24} 
+                      color={toggleButton === 'On' ? "black" : "red"} 
+                      selectable={undefined}/>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -585,6 +616,9 @@ const webStyles = StyleSheet.create({
     color:  'white',
   },
   editMode: {
-    backgroundColor: ''
+    backgroundColor: '#9EC6F3',
   },
+  editModeButton: {
+    backgroundColor: 'white'
+  }
 })
