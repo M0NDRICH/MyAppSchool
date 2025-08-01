@@ -10,6 +10,7 @@ const addQuiz = () => {
   
   const [inputQuestionValue, setInputQuestionValue] = useState('');
   const [inputTitleValue,       setInputTitleValue] = useState('');
+  const [disableButtons,         setDisableButtons] = useState(false);
   const [inputAValue,               setInputAValue] = useState('');
   const [inputBValue,               setInputBValue] = useState('');
   const [inputCValue,               setInputCValue] = useState('');
@@ -19,11 +20,15 @@ const addQuiz = () => {
   const [correctAnswerC,         setCorrectAnswerC] = useState(false);
   const [correctAnswerD,         setCorrectAnswerD] = useState(false);
   const [disableField,             setDisableField] = useState(false);
-  const [toggleButton,             setToggleButton] = useState('On');
-  const [quizToken,                   setQuizToken] = useState([]);
+  const [toggleButton,             setToggleButton] = useState('On');  // For editing quizToken
+  const [quizToken,                   setQuizToken] = useState([]);    // The array that holds all the quizTokens or the Questions with its respective choices or options
+  const [finalCorrectAnswer, setFinalCorrectAnswer] = useState('none');// This holds the final correct answer of a question, used when in editing or creating mode
+  
 
+  // This is a proxy token used for getting the user inputs and also serves as a template
   const sampleQuestionToken = {
     "type":"proxyToken",
+    "status":"alive",
     "editable": true,
     "id": 0,
     "question":"What does the fox says?",
@@ -43,6 +48,7 @@ const addQuiz = () => {
     toggleButton === 'On' ? quizToken[0].editable = false : quizToken[0].editable = true;
   }
 
+  // For setting up the proxy token once the page is rendering
   useEffect(()=>{
     addNewQuizToken(sampleQuestionToken);
   }, []);
@@ -54,8 +60,32 @@ const addQuiz = () => {
     return targetQuizToken;
   }
 
-  const editCard = (id) => {
-    console.log('edit card is running '+ id)
+  // this function kills or disables all the buttons except the quizToken that invokes it
+  // id:      id of the quizToken that invokes the function thus making the quizToken immune to killing or disabling function
+  //          id can be set to string none, in which it is use when trying to revert back all the quizToken's status to 'alive'
+  // methods: kill   = disables all button functions by setting all token's status to 'dead'
+  //          revive = revert all status back to 'alive'
+  function killAllTokens(id = 'none', method){
+    
+    if(id !== 'none' && method === 'kill')
+    {
+      quizToken.map((item)=>{
+        if(item.id === id)
+        {
+          item.status = 'alive';
+        }
+        else
+        {
+          item.status = 'dead';
+        }
+      });
+    }
+    else if (id === 'none' && method === 'revive')
+    {
+      quizToken.map((item)=>{
+        item.status = 'alive';
+      });
+    }
   }
 
   const assignValuesToTextFields = (item) => {
@@ -90,6 +120,18 @@ const addQuiz = () => {
     
   }
 
+
+  // this function has two modes and execute depends on the toggleButton
+  // if the button is click it will check
+  // if toggleButton is equals to 'On'  => the current quizToken that invokes it will enter an edit mode in which it
+  //                                       enables text fields to accept user inputs while the default value of the
+  //                                       text fields are the actual value of the quizToken instead of placeholders.
+  //                                       During in edit mode the icon of the button will change to 'check icon' and also
+  //                                       will set the the toggleButton = 'Off'.
+  // if toggleButton is equals to 'Off' => the icon of the button will appear as an 'check icon' instead of an 'edit icon'.
+  //                                       If click it will run the saveEdittedTokeng() in which it will handle the values and then
+  //                                       reassign or modify the values of the current quizToken that invokes it, then save to the 
+  //                                       quizToken array. Then run some of the other functions and lastly it will set the toggleButton = 'On'.
   const editQuestionToken = (id) => {
     if (toggleButton === 'On')
     {
@@ -99,11 +141,13 @@ const addQuiz = () => {
 
       if (targetQuizToken !== 'not_found')
       {
+        killAllTokens(targetQuizToken.id, 'kill')
         disableProxy();
         assignValuesToTextFields(targetQuizToken);
         targetQuizToken.editable = true;
       }
 
+      setDisableButtons(true);
       setToggleButton('Off');
     }
     else if (toggleButton === 'Off')
@@ -112,6 +156,8 @@ const addQuiz = () => {
       resetInputValues();
       disableProxy();
       setToggleButton('On');
+      setDisableButtons(false);
+      killAllTokens('none', 'revive');
     }
     
   }
@@ -124,10 +170,10 @@ const addQuiz = () => {
     resetInputValues();
     targetQuizToken.editable = false;
     setToggleButton('On');
+    killAllTokens('none', 'revive');
   }
   
   const deleteQuestionToken = (id) => {
-
     const result = quizToken.filter((item)=>{
       if (item.id !== id) {
         return true;
@@ -147,61 +193,30 @@ const addQuiz = () => {
     })
   }
 
-  /*
-  const renderItem = ({item}) => (
-    <View style={styles.questionCard}
-    key={item.id}
-    >
-      <View style={styles.question}>
-        <Text style={[styles.questionText, styles.textPrimary]}>Question: </Text>
-        <TextInput
-        style={[styles.textSecondary, styles.questionInputText]}
-        value={item.question}
-        editable={false}
-        onChangeText={text => setInputQuestionValue(text)}
-        />
-      </View>
-      <View style={styles.questionChoices}>
-        <View style={styles.choiceLetter}>
-          <Text style={styles.textPrimary}>A: </Text>
-          <TextInput
-          style={[styles.textSecondary, styles.choiceInputField]}
-          placeholder='Type text here for A...'
-          value={item.A}
-          editable={false}
-          onChangeText={text => setInputAValue(text)}
-          />
-        </View>
-        <View style={styles.choiceLetter}>
-          <Text style={styles.textPrimary}>B: </Text>
-          <TextInput
-          style={[styles.textSecondary, styles.choiceInputField]}
-          value={item.B}
-          editable={false}
-          onChangeText={text => setInputBValue(text)}
-          />
-        </View>
-        <View style={styles.choiceLetter}>
-          <Text style={styles.textPrimary}>C: </Text>
-          <TextInput
-          style={[styles.textSecondary, styles.choiceInputField]}
-          value={item.C}
-          editable={false}
-          onChangeText={text => setInputCValue(text)}
-          />
-        </View>
-        <View style={styles.choiceLetter}>
-          <Text style={styles.textPrimary}>D: </Text>
-          <TextInput
-          style={[styles.textSecondary, styles.choiceInputField]}
-          value={item.D}
-          editable={false}
-          onChangeText={text => setInputDValue(text)}
-          />
-        </View>
-      </View>
-    </View>
-  )*/
+  const setCorrectAnswer = (id ,letter) => {
+    const targetQuizToken = getQuizToken(id);
+    
+    if (targetQuizToken !== 'not_found')
+    {
+      switch (letter) {
+        case "A":
+          setCorrectAnswerA(true);
+          break;
+        case "B":
+          setCorrectAnswerB(true);
+          break;
+        case "C":
+          setCorrectAnswerC(true);
+          break;
+        case "D":
+          setCorrectAnswerD(true);
+          break;
+        default:
+          console.log('setting a correct answer is not executed');
+          break;
+      }
+    }
+  }
 
   const renderItem = ({item}) => {
     if (item.type === 'proxyToken')
@@ -268,7 +283,7 @@ const addQuiz = () => {
     } 
     else 
     {
-      return <View style={[styles.questionCard, toggleButton === 'Off' && styles.editMode]}
+      return <View style={[styles.questionCard, toggleButton === 'Off' && item.editable && styles.editMode]}
               key={item.id}
               >
                 <View style={styles.questionCardHeader}>
@@ -277,23 +292,25 @@ const addQuiz = () => {
                   </View>
                   <View style={styles.rightSideHeader}>
                     <TouchableOpacity
-                     style={[styles.editButton, toggleButton === 'Off' && styles.editModeButton]}
+                     disabled={item.status === 'alive' ? false : true}
+                     style={[styles.editButton, toggleButton === 'Off' && item.editable && styles.editModeButton]}
                      onPress={()=>{editQuestionToken(item.id)}}>
                       {/* <Text>{toggleButton === 'On' ? 'E' : 'S'}</Text> */}
                       <MaterialIcons
-                      name={toggleButton === 'On' ? 'edit' : 'check'} 
+                      name={(!item.editable)? 'edit' : 'check'} 
                       size={24} 
                       color='black'
                       selectable={undefined}/>
                     </TouchableOpacity>
                     <TouchableOpacity
-                     style={[styles.deleteButton, toggleButton === 'Off' && styles.editModeButton]}
+                     disabled={item.status === 'alive' ? false : true}
+                     style={[styles.deleteButton, toggleButton === 'Off' && item.editable  && styles.editModeButton]}
                      onPress=
-                     {()=>{if (toggleButton === 'On') {deleteQuestionToken(item.id);} else { cancelEditToken(item.id);}}}>
+                     {()=>{if (toggleButton === 'On' && !item.editable) {deleteQuestionToken(item.id);} else { cancelEditToken(item.id);}}}>
                       <MaterialIcons 
-                      name={toggleButton === 'On' ? "delete" : "clear" } 
+                      name={(!item.editable) ? "delete" : "clear" } 
                       size={24} 
-                      color={toggleButton === 'On' ? "black" : "red"} 
+                      color={(!item.editable) ? "black" : "red"} 
                       selectable={undefined}/>
                     </TouchableOpacity>
                   </View>
@@ -316,6 +333,14 @@ const addQuiz = () => {
                     editable={item.editable}
                     onChangeText={text => setInputAValue(text)}
                     />
+                    <TouchableOpacity style={styles.correctAnswerToggle}>
+                      <MaterialIcons 
+                      name={correctAnswerA === true ? 'star': 'star-outline'}
+                      size={24} 
+                      selectable={undefined}
+                      color="#3C2F60"
+                      />
+                    </TouchableOpacity>
                   </View>
                   <View style={styles.choiceLetter}>
                     <Text style={styles.textPrimary}>B: </Text>
@@ -325,6 +350,14 @@ const addQuiz = () => {
                     editable={item.editable}
                     onChangeText={text => setInputBValue(text)}
                     />
+                    <TouchableOpacity style={styles.correctAnswerToggle}>
+                      <MaterialIcons 
+                      name={correctAnswerB === true ? 'star': 'star-outline'}
+                      size={24} 
+                      selectable={undefined}
+                      color="#3C2F60"
+                      />
+                    </TouchableOpacity>
                   </View>
                   <View style={styles.choiceLetter}>
                     <Text style={styles.textPrimary}>C: </Text>
@@ -334,6 +367,14 @@ const addQuiz = () => {
                     editable={item.editable}
                     onChangeText={text => setInputCValue(text)}
                     />
+                    <TouchableOpacity style={styles.correctAnswerToggle}>
+                      <MaterialIcons 
+                      name={correctAnswerC === true ? 'star': 'star-outline'}
+                      size={24} 
+                      selectable={undefined}
+                      color="#3C2F60"
+                      />
+                    </TouchableOpacity>
                   </View>
                   <View style={styles.choiceLetter}>
                     <Text style={styles.textPrimary}>D: </Text>
@@ -343,6 +384,14 @@ const addQuiz = () => {
                     editable={item.editable}
                     onChangeText={text => setInputDValue(text)}
                     />
+                    <TouchableOpacity style={styles.correctAnswerToggle}>
+                      <MaterialIcons 
+                      name={correctAnswerD === true ? 'star': 'star-outline'}
+                      size={24} 
+                      selectable={undefined}
+                      color="#3C2F60"
+                      />
+                    </TouchableOpacity>
                   </View>
                 </View>
               </View>
@@ -358,7 +407,8 @@ const addQuiz = () => {
   }
 
   const addNewQuestionToken = () => {
-    const question = inputQuestionValue;
+    if(quizToken[0].status !== 'dead')
+    {const question = inputQuestionValue;
     const choiceA = inputAValue;
     const choiceB =  inputBValue;
     const choiceC = inputCValue;
@@ -384,6 +434,7 @@ const addQuiz = () => {
 
     const newQuizToken = {
       "type":"token",
+      "status":"alive",
       "editable": false,
       "id": id,
       "question": question,
@@ -391,11 +442,12 @@ const addQuiz = () => {
       "B":choiceB,
       "C":choiceC,
       "D":choiceD,
+      "correctAnswer" : '',
     }
 
     addNewQuizToken(newQuizToken);
     resetInputValues();
-    console.log(quizToken)
+    console.log(quizToken)}
   }
 
   const tryPrint = () => {
