@@ -1,39 +1,127 @@
 import { View, Text, StyleSheet, Pressable, FlatList, Platform, TextInput, TouchableOpacity } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Link } from 'expo-router'
+import { MaterialIcons } from '@expo/vector-icons'
 import React, { useState, useEffect } from 'react'
 
 const addQuiz = () => {
   // const styles = Platform.OS === 'web' ? webStyles : mobileStyles;
   const styles = webStyles;
-  const [quizToken,                   setQuizToken] = useState([]);
+  
   const [inputQuestionValue, setInputQuestionValue] = useState('');
   const [inputTitleValue,       setInputTitleValue] = useState('');
   const [inputAValue,               setInputAValue] = useState('');
   const [inputBValue,               setInputBValue] = useState('');
   const [inputCValue,               setInputCValue] = useState('');
   const [inputDValue,               setInputDValue] = useState('');
+  const [correctAnswerA,         setCorrectAnswerA] = useState(false);
+  const [correctAnswerB,         setCorrectAnswerB] = useState(false);
+  const [correctAnswerC,         setCorrectAnswerC] = useState(false);
+  const [correctAnswerD,         setCorrectAnswerD] = useState(false);
+  const [disableField,             setDisableField] = useState(false);
+  const [toggleButton,             setToggleButton] = useState('On');
+  const [quizToken,                   setQuizToken] = useState([]);
 
   const sampleQuestionToken = {
     "type":"proxyToken",
+    "editable": true,
     "id": 0,
     "question":"What does the fox says?",
     "A":"fox fox fox fooox",
     "B":"Awww awww awww awww",
     "C":"Ting ning ning ning",
-    "D":"Ahh Daddy!"
+    "D":"Ahh Daddy!",
+    "correctAnswer":"C",
   };
 
   const addNewQuizToken = (newItem) => {
     setQuizToken(prev => [...prev, newItem]);
   }
 
+  const disableProxy = () => {
+    setDisableField(!disableField)
+    toggleButton === 'On' ? quizToken[0].editable = false : quizToken[0].editable = true;
+  }
+
   useEffect(()=>{
     addNewQuizToken(sampleQuestionToken);
   }, []);
 
+  const getQuizToken = (id) => {
+    let targetQuizToken = quizToken.find(token => token.id === id);
+    targetQuizToken === undefined && (targetQuizToken = 'not_found');
+
+    return targetQuizToken;
+  }
+
   const editCard = (id) => {
     console.log('edit card is running '+ id)
+  }
+
+  const assignValuesToTextFields = (item) => {
+    setInputQuestionValue(item.question);
+    setInputAValue(item.A);
+    setInputBValue(item.B);
+    setInputCValue(item.C);
+    setInputDValue(item.D);
+  }
+
+  const saveEdittedToken = (id) => {
+    const targetQuiz = quizToken[id];
+
+    targetQuiz.question = inputQuestionValue;
+    targetQuiz.editable = false;
+    targetQuiz.A        = inputAValue;
+    targetQuiz.B        = inputBValue;
+    targetQuiz.C        = inputCValue;
+    targetQuiz.D        = inputDValue;
+  }
+
+  const editQuestionToken = (id) => {
+    if (toggleButton === 'On')
+    {
+      const targetQuizToken = getQuizToken(id);
+
+      resetInputValues();
+
+      if (targetQuizToken !== 'not_found')
+      {
+        disableProxy();
+        assignValuesToTextFields(targetQuizToken);
+        targetQuizToken.editable = true;
+      }
+
+      setToggleButton('Off');
+    }
+    else if (toggleButton === 'Off')
+    {
+      saveEdittedToken(id);
+      resetInputValues();
+      disableProxy();
+      setToggleButton('On');
+    }
+    
+  }
+  
+  const deleteQuestionToken = (id) => {
+
+    const result = quizToken.filter((item)=>{
+      if (item.id !== id) {
+        return true;
+      }
+    })
+
+    setQuizToken([]);
+
+    let customId = 0;
+    result.forEach((item)=>{
+      if(item.id !== 0)
+      {
+        item.id = customId;
+      }
+      addNewQuizToken(item);
+      customId++;
+    })
   }
 
   /*
@@ -97,7 +185,6 @@ const addQuiz = () => {
     {
       return <View style={styles.questionCard}
               key={item.id}
-              onPress={()=> editCard(id)}
               >
                 <View style={styles.numOfCard}>
                   <Text style={styles.textPrimary}>#{Number(item.id)}</Text>
@@ -107,7 +194,8 @@ const addQuiz = () => {
                   <TextInput
                   style={[styles.textSecondary, styles.questionInputText]}
                   placeholder='Type the question here...'
-                  value={inputQuestionValue}
+                  value={!disableField ? inputQuestionValue : ''}
+                  editable={!disableField}
                   onChangeText={text => setInputQuestionValue(text)}
                   />
                 </View>
@@ -117,7 +205,8 @@ const addQuiz = () => {
                     <TextInput
                     style={[styles.textSecondary, styles.choiceInputField]}
                     placeholder='Type text here for A...'
-                    value={inputAValue}
+                    value={!disableField ? inputAValue : ''}
+                    editable={!disableField}
                     onChangeText={text => setInputAValue(text)}
                     />
                   </View>
@@ -126,7 +215,8 @@ const addQuiz = () => {
                     <TextInput
                     style={[styles.textSecondary, styles.choiceInputField]}
                     placeholder='Type text here for B...'
-                    value={inputBValue}
+                    value={!disableField ? inputBValue : ''}
+                    editable={!disableField}
                     onChangeText={text => setInputBValue(text)}
                     />
                   </View>
@@ -135,7 +225,8 @@ const addQuiz = () => {
                     <TextInput
                     style={[styles.textSecondary, styles.choiceInputField]}
                     placeholder='Type text here for C...'
-                    value={inputCValue}
+                    value={!disableField ? inputCValue : ''}
+                    editable={!disableField}
                     onChangeText={text => setInputCValue(text)}
                     />
                   </View>
@@ -144,7 +235,8 @@ const addQuiz = () => {
                     <TextInput
                     style={[styles.textSecondary, styles.choiceInputField]}
                     placeholder='Type text here for D...'
-                    value={inputDValue}
+                    value={!disableField ? inputDValue : ''}
+                    editable={!disableField}
                     onChangeText={text => setInputDValue(text)}
                     />
                   </View>
@@ -161,11 +253,17 @@ const addQuiz = () => {
                     <Text style={styles.textPrimary}>#{Number(item.id)}</Text>
                   </View>
                   <View style={styles.rightSideHeader}>
-                    <TouchableOpacity style={styles.editButton}>
-                      <Text>E</Text>
+                    <TouchableOpacity
+                     style={styles.editButton}
+                     onPress={()=>{editQuestionToken(item.id)}}>
+                      {/* <Text>{toggleButton === 'On' ? 'E' : 'S'}</Text> */}
+                      <MaterialIcons
+                      name={toggleButton === 'On' ? 'edit' : 'check'} size={24} color='black'/>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.deleteButton}>
-                      <Text>D</Text>
+                    <TouchableOpacity
+                     style={styles.deleteButton}
+                     onPress={()=>{deleteQuestionToken(item.id)}}>
+                      <MaterialIcons name="clear" size={24} color="red" selectable={undefined}/>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -173,8 +271,8 @@ const addQuiz = () => {
                   <Text style={[styles.questionText, styles.textPrimary]}>Question: </Text>
                   <TextInput
                   style={[styles.textSecondary, styles.questionInputText]}
-                  value={item.question}
-                  editable={false}
+                  value={item.editable ? inputQuestionValue : item.question}
+                  editable={item.editable}
                   onChangeText={text => setInputQuestionValue(text)}
                   />
                 </View>
@@ -183,9 +281,8 @@ const addQuiz = () => {
                     <Text style={styles.textPrimary}>A: </Text>
                     <TextInput
                     style={[styles.textSecondary, styles.choiceInputField]}
-                    placeholder='Type text here for A...'
-                    value={item.A}
-                    editable={false}
+                    value={item.editable ? inputAValue : item.A}
+                    editable={item.editable}
                     onChangeText={text => setInputAValue(text)}
                     />
                   </View>
@@ -193,8 +290,8 @@ const addQuiz = () => {
                     <Text style={styles.textPrimary}>B: </Text>
                     <TextInput
                     style={[styles.textSecondary, styles.choiceInputField]}
-                    value={item.B}
-                    editable={false}
+                    value={item.editable ? inputBValue : item.B}
+                    editable={item.editable}
                     onChangeText={text => setInputBValue(text)}
                     />
                   </View>
@@ -202,8 +299,8 @@ const addQuiz = () => {
                     <Text style={styles.textPrimary}>C: </Text>
                     <TextInput
                     style={[styles.textSecondary, styles.choiceInputField]}
-                    value={item.C}
-                    editable={false}
+                    value={item.editable ? inputCValue : item.C}
+                    editable={item.editable}
                     onChangeText={text => setInputCValue(text)}
                     />
                   </View>
@@ -211,8 +308,8 @@ const addQuiz = () => {
                     <Text style={styles.textPrimary}>D: </Text>
                     <TextInput
                     style={[styles.textSecondary, styles.choiceInputField]}
-                    value={item.D}
-                    editable={false}
+                    value={item.editable ? inputDValue : item.D}
+                    editable={item.editable}
                     onChangeText={text => setInputDValue(text)}
                     />
                   </View>
@@ -221,7 +318,7 @@ const addQuiz = () => {
     }
   }
 
-  const resetInputValues = () => {
+  function resetInputValues(){
     setInputQuestionValue('');
     setInputAValue('');
     setInputBValue('');
@@ -256,6 +353,7 @@ const addQuiz = () => {
 
     const newQuizToken = {
       "type":"token",
+      "editable": false,
       "id": id,
       "question": question,
       "A":choiceA,
@@ -298,58 +396,6 @@ const addQuiz = () => {
           renderItem={renderItem}
           keyExtractor={quizToken => quizToken.id}
           />
-          {/* <View style={styles.questionCard}
-          key={sampleQuestionToken.id}
-          onPress={()=> editCard(id)}
-          >
-            <View style={styles.question}>
-              <Text style={[styles.questionText, styles.textPrimary]}>Question: </Text>
-              <TextInput
-              style={[styles.textSecondary, styles.questionInputText]}
-              placeholder='Type the question here...'
-              value={inputQuestionValue}
-              onChangeText={text => setInputQuestionValue(text)}
-              />
-            </View>
-            <View style={styles.questionChoices}>
-              <View style={styles.choiceLetter}>
-                <Text style={styles.textPrimary}>A: </Text>
-                <TextInput
-                style={[styles.textSecondary, styles.choiceInputField]}
-                placeholder='Type text here for A...'
-                value={inputAValue}
-                onChangeText={text => setInputAValue(text)}
-                />
-              </View>
-              <View style={styles.choiceLetter}>
-                <Text style={styles.textPrimary}>B: </Text>
-                <TextInput
-                style={[styles.textSecondary, styles.choiceInputField]}
-                placeholder='Type text here for B...'
-                value={inputBValue}
-                onChangeText={text => setInputBValue(text)}
-                />
-              </View>
-              <View style={styles.choiceLetter}>
-                <Text style={styles.textPrimary}>C: </Text>
-                <TextInput
-                style={[styles.textSecondary, styles.choiceInputField]}
-                placeholder='Type text here for C...'
-                value={inputCValue}
-                onChangeText={text => setInputCValue(text)}
-                />
-              </View>
-              <View style={styles.choiceLetter}>
-                <Text style={styles.textPrimary}>D: </Text>
-                <TextInput
-                style={[styles.textSecondary, styles.choiceInputField]}
-                placeholder='Type text here for D...'
-                value={inputDValue}
-                onChangeText={text => setInputDValue(text)}
-                />
-              </View>
-            </View>
-          </View> */}
         </View>
         <View style={styles.buttonArea}>
             <TouchableOpacity style={styles.addNewButton} onPress={()=>{addNewQuestionToken()}}>
@@ -454,9 +500,9 @@ const webStyles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   rightSideHeader: {
-    width: '15%',
+    width: '20%',
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
     marginRight: 15,
   },
   editButton: {
@@ -464,7 +510,7 @@ const webStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
     paddingVertical: 10,
   },
   deleteButton: {
@@ -472,7 +518,7 @@ const webStyles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
     paddingVertical: 10,
   },
   quizTokenContainer: {
@@ -537,5 +583,8 @@ const webStyles = StyleSheet.create({
   },
   saveButtonText: {
     color:  'white',
-  }
+  },
+  editMode: {
+    backgroundColor: ''
+  },
 })
