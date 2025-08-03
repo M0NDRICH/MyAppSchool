@@ -10,49 +10,18 @@ import playQuiz from './playQuiz'
 
 // TODO: choii create a card to display the score then create a button that will redirect to page where the user can see the answers and questions, basically a review
 const resultQuiz = () => {
-  const [quizzes, setQuizzes] = useState(data);
-  const {id} = useLocalSearchParams();
-  const  [myAnswersData, setMyAnswersData]  = useState([]);
-  const [score, setScore] = useState(0);
-  const targetQuiz = getQuiz(id);
-  const correctAnswers = targetQuiz.correctAnswers;
+  const [quizzes,                 setQuizzes] = useState(data);
+  const [myAnswersData,     setMyAnswersData] = useState([]);
+  const [correctAnswers,   setCorrectAnswers] = useState([]);
+  const [userAnswers,         setUserAnswers] = useState([]);
+  const [score,                     setScore] = useState(0);
   const [correctAnsState, setCorrectAnsState] = useState(correctAnswers)
-  let correctAnswersArr = extractCorrectAnswer(correctAnsState);
-  // let userAnswerArr;
-  const [userAnswerArr, setUserAnswerArr] = useState([]);
+  // const [userAnswerArr,     setUserAnswerArr] = useState([]);
+  const [targetQuizToken, setTargetQuizToken] = useState(undefined);
 
-  function extractCorrectAnswer(ans){
-    const letterArr = ['a', 'b', 'c', 'd'];
-    const arr = ans;
-    let result = [];
+  const {id} = useLocalSearchParams();
 
-    arr.forEach((ans)=>{
-      letterArr.forEach((letter)=>{
-        if (ans[letter] !== null && ans[letter] !== undefined){
-          // result.push((ans[letter]).toString());
-          result.push((letter).toUpperCase());
-        }
-      })
-    })
-    return result;
-  }
-  console.log(extractCorrectAnswer(correctAnswers));
-
-  function extractUserAnswer(ans){
-    const arr = ans;
-    let result = [];
-
-    arr.forEach((ans)=>{
-      if(ans.answer !== null && ans.answer !== undefined){
-        result.push((ans.answer).toString());
-      }
-    })
-
-    console.log(result);
-    return result;
-  }
-
-  useEffect(() => {
+   useEffect(() => {
     const fetchAnswers = async () => {
       try {
         const jsonValue = await AsyncStorage.getItem('myAnswers');
@@ -70,14 +39,83 @@ const resultQuiz = () => {
   }, []);
 
   useEffect(() => {
-    if (myAnswersData.length > 0) {
-      const arr = [...myAnswersData]
-      const extracted = extractUserAnswer(arr);
-      setUserAnswerArr(extracted);
-      console.log('Extracted user answers:', extracted);
-      evaluateAnswer(extracted);
+    const fetchData = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem("quizCollection");
+        const storageQuizzes = jsonValue != null ? JSON.parse(jsonValue) : null;
+
+        if (storageQuizzes && storageQuizzes.length) {
+          setQuizzes(storageQuizzes.sort((a,b)=> b.id - a.id))
+        } else {
+          setQuizzes(data.sort((a,b) => b.id - a.id))
+        }
+      } catch (e){
+        console.error(e)
+      }
     }
-  }, [myAnswersData]);
+
+    fetchData();
+  }, [data]);
+
+  useEffect(()=>{
+    const quiz = getQuiz(id);
+    setTargetQuizToken(quiz); 
+   
+    // const correctAnswers = targetQuiz.correctAnswers;
+    console.log('target quiz :' + targetQuizToken);
+    console.log('correct answers: ' + correctAnswers);
+  },[quizzes]);
+
+  useEffect(()=>{
+    extractCorrectAnswer(targetQuizToken);
+  }, [targetQuizToken]);
+
+  useEffect(()=>{
+    extractUserAnswer();
+  },[myAnswersData])
+
+  useEffect(()=>{
+    evaluateAnswer();
+  }, [userAnswers && correctAnswers]);
+
+  function extractCorrectAnswer(quiz){
+    const letterArr = ['a', 'b', 'c', 'd'];
+    let result = [];
+
+    quiz?.correctAnswers?.forEach((ans)=>{
+      letterArr.forEach((letter)=>{
+        if (ans[letter] !== null && ans[letter] !== undefined){
+          // result.push((ans[letter]).toString());
+          // result.push((letter).toUpperCase());
+          result.push((letter).toUpperCase());
+        }
+      })
+    })
+
+    setCorrectAnswers(result);
+    // return result;
+  }
+ 
+
+  function extractUserAnswer(){
+
+    myAnswersData.forEach((ans)=>{
+      if(ans !== null && ans !== undefined){
+        setUserAnswers(answers => [...answers, (ans).toUpperCase()])
+      }
+    })
+
+  }
+
+  // useEffect(() => {
+  //   if (myAnswersData.length > 0) {
+  //     const arr = [...myAnswersData]
+  //     const extracted = extractUserAnswer(arr);
+  //     setUserAnswerArr(extracted);
+  //     console.log('Extracted user answers:', extracted);
+  //     evaluateAnswer(extracted);
+  //   }
+  // }, [myAnswersData]);
 
 
   const printAnswers = () => {
@@ -90,30 +128,38 @@ const resultQuiz = () => {
     )
   }
 
-  const evaluateAnswer = (userAnswerArr) => {
-    const correctAnswerArr = extractCorrectAnswer(correctAnswers);
+  function evaluateAnswer(){
+   
     let tempScore = 0;
+    console.log('user answers : '+ userAnswers);
+    console.log('correct Answers : '+ correctAnswers)
 
-    userAnswerArr.forEach((userAns, index) => {
-      if (userAns === correctAnswerArr[index]) {
+    userAnswers?.forEach((userAns, index) => {
+      if (userAns === correctAnswers[index]) {
         ++tempScore;
       }
     });
 
-    console.log(`Final score: ${tempScore}/${correctAnswerArr.length}`);
+    console.log(`Final score: ${tempScore}/${correctAnswers.length}`);
     setScore(tempScore)
   };
 
   const clearStorage = async () => {
+    setScore(0);
     await AsyncStorage.removeItem('myAnswers');
   }
   
 
 
+  if (!targetQuizToken)
+  { 
+    return (<View><Text>Loading...</Text></View>);
+  }
+  
   return (
     <SafeAreaView style={styles.safeContainer}>
       <Link
-      href='/playQuiz'
+      href='/quizMenu'
       asChild
       >
         <TouchableOpacity style={styles.backButton} onPress={clearStorage}>
@@ -123,7 +169,7 @@ const resultQuiz = () => {
       <View style={styles.resultCard}>
         <View style={styles.resultCardMainBody}>
           <Text style={styles.resultTextTitle}>Result:</Text>
-          <Text style={styles.resultText}>Your Score is {score}/{correctAnsState.length}!</Text>
+          <Text style={styles.resultText}>Your Score is {score}/{targetQuizToken.questions.length}!</Text>
         </View>
         <TouchableOpacity onPress={()=>{ printAnswers();}} style={styles.buttonReviewAnswers}>
           <Text style={styles.buttonText}>View Answers</Text>

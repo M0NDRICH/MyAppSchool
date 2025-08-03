@@ -1,26 +1,105 @@
-import { View, Text, StyleSheet, Pressable, FlatList} from 'react-native';
+import { View, Text, StyleSheet, Pressable, FlatList, TouchableOpacity} from 'react-native';
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Link } from 'expo-router';
 import { data } from '@/data/quizzes';
+import { MaterialIcons } from '@expo/vector-icons'
 import React,{ useState, useEffect } from 'react'
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const home = () => {
   const [quizzes, setQuizzes] = useState(data);
+  const [temporaryQuizzes, setTemporaryQuizzes] = useState(data);
+  const [temporary, setTemporary] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem("quizCollection");
+        const storageQuizzes = jsonValue != null ? JSON.parse(jsonValue) : null;
+
+        if (storageQuizzes && storageQuizzes.length) {
+          setQuizzes(storageQuizzes.sort((a,b)=> b.id - a.id))
+          setTemporary(false);
+          console.log(quizzes);
+        } else {
+          setTemporaryQuizzes(data.sort((a,b) => b.id - a.id))
+          setTemporary(true);
+        }
+      } catch (e){
+        console.error(e)
+      }
+    }
+
+    const clearMyAnswersStorage = async () => {
+      await AsyncStorage.removeItem('myAnswers');
+    }
+
+    fetchData();
+    clearMyAnswersStorage();
+  }, [data]);
+
+  useEffect(() => {
+    console.log("Updated quizzes:", quizzes);
+  }, [quizzes]);
+
+
+  useEffect(() => {
+
+    if (temporary !== true) 
+    {
+       const storeData = async () => {
+          try {
+            const jsonValue = JSON.stringify(quizzes)
+            await AsyncStorage.setItem("quizCollection", jsonValue)
+          } catch (e) {
+            console.error(e)
+          }
+        }
+
+        storeData();
+    }
+  }, [quizzes])
+
+  const removeQuiz = (idToRemove) => {
+  const updated = quizzes
+      .filter(item => item.id !== idToRemove)
+      .map((item, index) => ({
+        ...item,
+        id: index + 1, // reassigns new sequential ID
+      }));
+
+    setTemporaryQuizzes(data.sort((a,b) => b.id - a.id))
+
+    setQuizzes(updated.sort((a, b) => b.id - a.id));
+  };
+
 
   const renderItem = ({ item }) => (
-    <Link
-    href={{
-      pathname: '/playQuiz',
-      params: { id: item.id }
-    }}
-    style={[{ marginHorizontal: 'auto' }]}
-    asChild
-    >
-    <Pressable style={styles.quizToken}>
-      <Text style={styles.quizText}>{item.title}</Text>
-      <Text style={styles.quizText}>Items: {item.questions.length}</Text>
-    </Pressable>
-    </Link>
+    <View style={styles.quizTokenLine}>
+      <Link
+      href={{
+        pathname: '/playQuiz',
+        params: { id: item.id }
+      }}
+      asChild
+      >
+      <Pressable style={styles.quizToken}>
+        <Text style={styles.quizText}>{item.title}</Text>
+        <Text style={styles.quizText}>Items: {item.questions.length}</Text>
+      </Pressable>
+      </Link>
+
+      <TouchableOpacity
+      style={styles.deleteButton}
+      onPress={()=>{removeQuiz(item.id);}}
+      >
+        <MaterialIcons 
+          name={"delete"} 
+          size={24} 
+          color={"black"} 
+          selectable={undefined}/>
+      </TouchableOpacity>
+    </View>
   )
 
   return (
@@ -32,7 +111,7 @@ const home = () => {
         <View style={styles.midPart}>
           <FlatList
           style={styles.quizTokenContainer}
-          data={quizzes}
+          data={temporary === true ? temporaryQuizzes : quizzes }
           renderItem={renderItem}
           keyExtractor={quiz => quiz.id}
           contentContainerStyle={{flexGrow: 1}}
@@ -99,11 +178,17 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
   },
+  quizTokenLine: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+    alignItems: 'stretch',
+  },
   quizTokenContainer: {
     width: '100%',
   },
   quizToken: {
-    width: '100%',
+    width: '90%',
     height: 50,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -118,6 +203,16 @@ const styles = StyleSheet.create({
     color: '#3C2F60',
     fontWeight: 700,
     fontSize: 16,
+  },
+  deleteButton: {
+    backgroundColor: '#BDDDE4',
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    paddingHorizontal: 25,
+    paddingVertical: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   addQuizButton: {
     marginTop: 16,

@@ -35,6 +35,7 @@ export default function RootLayout() {
       initialRouteName='index'
       screenOptions={{ headerStyle: { backgroundColor: theme.headerBackground }, headerTintColor: theme.text, headerShadowVisible: false }}>
       <Stack.Screen name="quizMenu" options={{ headerShown: false, title: 'LandPage'}}/>
+      <Stack.Screen name="resultQuiz" options={{ headerShown: false, title: 'resultQuiz'}}/>
       <Stack.Screen name="playQuiz" options={{ headerShown: false, title: 'PlayQuiz'}}/>
       <Stack.Screen name="addQuiz" options={{ headerShown: false, title: 'AddQuiz'}}/>
       <Stack.Screen name="index" options={{ headerShown: false, title: 'index' }} />

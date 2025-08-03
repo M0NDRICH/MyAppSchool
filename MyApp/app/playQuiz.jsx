@@ -10,45 +10,120 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 
 
 const playQuiz = () => {
-  const {id} = useLocalSearchParams();
-  const [quizzes, setQuizzes] = useState(data);
-  // const [myAnswersData, setMyAnswers] = useState(myAnswers);
-  const flatListRef = useRef(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [quizIndex, setQuizIndex] = useState(0);
-  const router = useRouter();
-  let currentPage = useRef(0);
-  let targetQuiz;
-  let targetQuestion = [];
-  let answer;
+  const [quizzes,                   setQuizzes] = useState(data);
+  const [temporaryQuizzes, setTemporaryQuizzes] = useState(data);
+  const [temporary,               setTemporary] = useState(true);
+  const [quizToken,               setQuizToken] = useState(undefined);
+  const [isStorageLoaded,   setIsStorageLoaded] = useState(false);
+  const [currentPage,           setCurrentPage] = useState(0);
+  const [currentAnswer,       setCurrentAnswer] = useState(undefined);
+  const [correctAnswers,     setCorrectAnswers] = useState([]);
+  const [userAnswers,           setUserAnswers] = useState([]);
 
+  const {id} = useLocalSearchParams();
+  const router = useRouter();
   const styles = Platform.OS === 'web' ? webStyles : mobileStyles;
 
-  const saveAnswersToStorage = async (answers) => {
-    try {
-      await AsyncStorage.setItem('myAnswers', JSON.stringify(answers));
-      console.log('Answers saved!');
-    } catch (error) {
-      console.error('Failed to save answers: ', error);
-    }
-  };
- 
+  function getQuizToken(id){
+    let result;
 
-  function getQuiz(id){
-    return quizzes.find((quiz)=>
-    quiz.id === Number(id)
-    )
+    if (temporary)
+    {
+      result = temporaryQuizzes.find((item)=> item.id === parseInt(id));
+    } 
+    else if (!temporary)
+    {
+      result = quizzes.find((item) => item.id === parseInt(id));
+    }
+
+    return result;
   }
 
-  const bindingVow = (id, question, choices) => {
-    return {
-      "id": id,
-      "question": question,
-      "choices" : choices
+  const extractAndAssignValues = (token) => {
+    const correctAns = [];
+    const questions  = [];
+  }
+
+  const redirectToResultQuizPage = () => {
+    router.push({pathname: '/resultQuiz', params: {id: id}})
+  } 
+
+  const nextPage = () => {
+
+    if (currentPage === quizToken?.questions?.length - 1 && currentAnswer !== undefined)
+    {
+      setUserAnswers(answers => [...answers, currentAnswer]);
+      console.log(userAnswers);
+      setCurrentPage(0);
+      setCurrentAnswer(undefined);
+      redirectToResultQuizPage();
     }
+    else if (currentPage < quizToken?.questions?.length && currentAnswer !== undefined)
+    {
+      setCurrentPage(current => current + 1);
+      setUserAnswers(answers => [...answers, currentAnswer]);
+      setCurrentAnswer(undefined);
+    }
+    
+  }
+
+  useEffect (()=>{
+    const saveAnswersToStorage = async () => {
+      try {
+        await AsyncStorage.setItem('myAnswers', JSON.stringify(userAnswers));
+        console.log('Answers saved!');
+      } catch (error) {
+        console.error('Failed to save answers: ', error);
+      }
+    };
+
+    saveAnswersToStorage();
+  }, [userAnswers]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem("quizCollection");
+        const storageQuizzes = jsonValue != null ? JSON.parse(jsonValue) : null;
+
+        if (storageQuizzes && storageQuizzes.length) {
+          setQuizzes(storageQuizzes.sort((a,b)=> b.id - a.id))
+          setTemporary(false);
+          const result = storageQuizzes.find((item)=> item.id === parseInt(id));
+          setQuizToken(result);
+        } else {
+          setTemporaryQuizzes(data.sort((a,b) => b.id - a.id))
+          setTemporary(true);
+          const result = data.find((item)=> item.id === parseInt(id));
+          setQuizToken(result);
+        }
+        setIsStorageLoaded(true);
+      } catch (e){
+        console.error(e);
+        setIsStorageLoaded(true);
+      }
+    }
+
+    fetchData();
+  }, [data]);
+  
+
+  useEffect(()=>{
+    if (isStorageLoaded)
+    {
+      const result = getQuizToken(id);
+      setQuizToken(result);
+      console.log(quizToken);
+    }
+    
+  },[isStorageLoaded]);
+
+  const handleAnswer = (letter) => {
+    setCurrentAnswer(letter);
   }
 
   const renderChoices = (choices) => {
+    if (!choices || typeof choices !== 'object') return null;
     return (
       <>
         {choices.a !== null && (
@@ -83,90 +158,26 @@ const playQuiz = () => {
     );
   };
 
-  const renderQuizCard = (question, choices) => (
+  const renderQuizCard = (choices) => (
 
      <View style={styles.quizBody}>
       <View style={styles.quizBodyContainer}>
         <View style={styles.quizQuestion}>
           <Text style={styles.quizQuestionText}>{'Question:'}</Text>
-          <Text style={styles.quizQuestionText}>{question}</Text>
+          <Text style={styles.quizQuestionText}>{quizToken?.questions[currentPage]}</Text>
         </View>
         <View style={styles.quizQuestionChoices}>
-          {renderChoices(choices)}
+          {renderChoices(quizToken?.choices[currentPage])}
         </View>
       </View>
     </View>
   )
 
-  targetQuiz = getQuiz(id);
-  if (!targetQuiz) return <Text>Quiz not found</Text>;
-
-  const numberOfQuestions = targetQuiz.questions.length;
-  const [answers, setAnswers] = useState(new Array(numberOfQuestions));
-  const pageNum = answers.length;
-  
-  
-  for(let i = 0; i < targetQuiz.questions.length; i++){
-    let question = targetQuiz.questions[i];
-    let choices = targetQuiz.choices[i];
-
-    targetQuestion.push(bindingVow( i,question, choices));
+  if (!quizToken)
+  { 
+    return (<View><Text>Loading...</Text></View>);
   }
 
-  function handleAnswer(currentAnswer){
-    answer = currentAnswer;
-  }
-
-  function resetAnswers(){
-    setAnswers(new Array(numberOfQuestions));
-    currentPage.current = 0;
-  }
-
-  const saveAnswer = async () => {
-    let num = currentPage.current;
-    if (currentPage.current < pageNum){
-      const updated = [...answers];
-      // const myAnswersUpdated = [...myAnswersData];
-      // myAnswersUpdated[num] = {answer};
-      if(updated[num] === undefined && answer !== undefined){
-        updated[num] = {answer};
-        // setMyAnswers(myAnswersUpdated);
-        setAnswers(updated);
-        num !== targetQuestion.length - 1 && (answer = undefined);
-        console.log(updated);
-        // console.log(myAnswersUpdated)
-        await saveAnswersToStorage(updated);
-        currentPage.current++;
-      }
-    }
-  }
-
-  function redirect(){
-    console.log('redirect is running');
-    
-    const itemAnswer = [...answers];
-    //const result = itemAnswer.every((item)=>  item !== null);
-    //console.log(result);
-    console.log(itemAnswer[numberOfQuestions-2]);
-    console.log(itemAnswer[numberOfQuestions-1]);
-    console.log(answer);
-    if(quizIndex === targetQuestion.length - 1 && answer !== undefined){
-      router.push(`/resultQuiz?id=${encodeURIComponent(id)}`);
-    }
-  }
-
-  const confirmButton = () => {
-    let num = currentPage.current;
-    const currentAnswer = [...answers];
-    console.log('currentAnswer:'+currentAnswer[num - 1]);
-    if (quizIndex < targetQuestion.length - 1 && answer !== undefined) {
-      setQuizIndex(quizIndex + 1); 
-    }
-  }
-
-  const clearStorage = async () => {
-    await AsyncStorage.removeItem('myAnswers');
-  }
 
   return (
     <SafeAreaView style={styles.safeContainer}>
@@ -174,24 +185,24 @@ const playQuiz = () => {
       href='/quizMenu'
       asChild
       >
-        <Pressable style={styles.backButton} onPress={()=>{resetAnswers();}}>
+        <TouchableOpacity style={styles.backButton} onPress={()=>{}}>
           <Text style={styles.buttonText}>Back</Text>
-        </Pressable>
+        </TouchableOpacity>
       </Link>
       <View style={styles.quizCard}>
         <View style={styles.quizHeader}>
           <View style={styles.quizTitle}>
-            <Text style={styles.quizTitleText}>{targetQuiz.title}</Text>
+            <Text style={styles.quizTitleText}>{quizToken?.title}</Text>
           </View>
           <View style={styles.quizNumOfItems}>
-            <Text style={styles.quizNumOfItemsText}>{targetQuiz.questions.length}</Text>
+            <Text style={styles.quizNumOfItemsText}>{(Number(currentPage) + 1) +'/' + quizToken?.questions?.length}</Text>
           </View>
         </View>
         <View style={[styles.quizMainContainer]}>
-        {renderQuizCard(targetQuestion[quizIndex].question, targetQuestion[quizIndex].choices)}
+        {renderQuizCard()}
         </View>
       </View>
-      <TouchableOpacity style={styles.confirmButton} onPress={()=>{confirmButton(); saveAnswer(); redirect()}} disabled={quizIndex === targetQuestion.length || answer===null}>
+      <TouchableOpacity style={styles.confirmButton} onPress={()=>{console.log('quiz token'+ quizToken); nextPage();}}>
         <Text style={styles.confirmButtonText}>Confirm</Text>
       </TouchableOpacity>
     </SafeAreaView>

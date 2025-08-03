@@ -2,27 +2,28 @@ import { View, Text, StyleSheet, Pressable, FlatList, Platform, TextInput, Touch
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Link } from 'expo-router'
 import { MaterialIcons } from '@expo/vector-icons'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { useState, useEffect } from 'react'
 
 const addQuiz = () => {
   // const styles = Platform.OS === 'web' ? webStyles : mobileStyles;
   const styles = webStyles;
   
-  const [inputQuestionValue, setInputQuestionValue] = useState('');
-  const [inputTitleValue,       setInputTitleValue] = useState('');
-  const [disableButtons,         setDisableButtons] = useState(false);
-  const [inputAValue,               setInputAValue] = useState('');
-  const [inputBValue,               setInputBValue] = useState('');
-  const [inputCValue,               setInputCValue] = useState('');
-  const [inputDValue,               setInputDValue] = useState('');
-  const [correctAnswerA,         setCorrectAnswerA] = useState(false);
-  const [correctAnswerB,         setCorrectAnswerB] = useState(false);
-  const [correctAnswerC,         setCorrectAnswerC] = useState(false);
-  const [correctAnswerD,         setCorrectAnswerD] = useState(false);
-  const [disableField,             setDisableField] = useState(false);
-  const [toggleButton,             setToggleButton] = useState('On');  // For editing quizToken
-  const [quizToken,                   setQuizToken] = useState([]);    // The array that holds all the quizTokens or the Questions with its respective choices or options
-  const [finalCorrectAnswer, setFinalCorrectAnswer] = useState('none');// This holds the final correct answer of a question, used when in editing or creating mode
+  const [inputQuestionValue,   setInputQuestionValue] = useState('');
+  const [inputTitleValue,         setInputTitleValue] = useState('');
+  const [disableButtons,           setDisableButtons] = useState(false);
+  const [inputAValue,                 setInputAValue] = useState('');
+  const [inputBValue,                 setInputBValue] = useState('');
+  const [inputCValue,                 setInputCValue] = useState('');
+  const [inputDValue,                 setInputDValue] = useState('');
+  const [correctAnswerA,           setCorrectAnswerA] = useState(false);
+  const [correctAnswerB,           setCorrectAnswerB] = useState(false);
+  const [correctAnswerC,           setCorrectAnswerC] = useState(false);
+  const [correctAnswerD,           setCorrectAnswerD] = useState(false);
+  const [disableField,               setDisableField] = useState(false);
+  const [toggleButton,               setToggleButton] = useState('On');  // For editing quizToken
+  const [quizToken,                     setQuizToken] = useState([]);    // The array that holds all the quizTokens or the Questions with its respective choices or options
+  const [finalQuizTokenArray, setFinalQuizTokenArray] = useState([]);    // This holds the final quiz token and the other quiz tokens across all files
   
 
   // This is a proxy token used for getting the user inputs and also serves as a template
@@ -38,6 +39,41 @@ const addQuiz = () => {
     "D":"Ahh Daddy!",
     "correctAnswer":"C",
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const jsonValue = await AsyncStorage.getItem("quizCollection");
+        const storageQuizzes = jsonValue != null ? JSON.parse(jsonValue) : null;
+
+        if (storageQuizzes && storageQuizzes.length) {
+          setFinalQuizTokenArray(storageQuizzes.sort((a,b)=> b.id - a.id))
+        } else {
+          setFinalQuizTokenArray(finalQuizTokenArray.sort((a,b) => b.id - a.id))
+        }
+      } catch (e){
+        console.error(e)
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  useEffect(()=>{
+    const saveAnswersToStorage = async () => {
+      try {
+        const quiz = JSON.stringify(finalQuizTokenArray);
+        await AsyncStorage.setItem('quizCollection', quiz);
+        console.log('Quiz is saved!');
+      } catch (error) {
+        console.error('Failed to save finalQuizToken: ', error);
+      }
+    };
+
+    saveAnswersToStorage();
+  }, [finalQuizTokenArray])
+
+  
 
   const addNewQuizToken = (newItem) => {
     setQuizToken(prev => [...prev, newItem]);
@@ -88,13 +124,69 @@ const addQuiz = () => {
     }
   }
 
+  // const assignCorrectAnswer = (item) => {
+
+  // }
+
+  const clearAnswerOptions = () => {
+    setCorrectAnswerA(false);
+    setCorrectAnswerB(false);
+    setCorrectAnswerC(false);
+    setCorrectAnswerD(false);
+  }
+
+  const setCorrectAnswer = (letter, id = 'none') => {
+    clearAnswerOptions();
+
+    // if ( id !== 'none' )
+    // {
+    //   quizToken[id].correctAnswer = undefined
+    // }
+    // const targetQuizToken = getQuizToken(id);
+    
+    // if (targetQuizToken !== 'not_found')
+    // {
+      switch (letter) {
+        case "A":
+          // id !== 'none' && (quizToken[id].correctAnswer = 'A');
+          setCorrectAnswerA(true);
+          break;
+        case "B":
+          setCorrectAnswerB(true);
+          break;
+        case "C":
+          setCorrectAnswerC(true);
+          break;
+        case "D":
+          setCorrectAnswerD(true);
+          break;
+        default:
+          console.log('setting a correct answer is not executed');
+          break;
+      }
+    // }
+  }
+
   const assignValuesToTextFields = (item) => {
     setInputQuestionValue(item.question);
     setInputAValue(item.A);
     setInputBValue(item.B);
     setInputCValue(item.C);
     setInputDValue(item.D);
+    setCorrectAnswer(item.correctAnswer);
   }
+
+  const getCorrectAnswer = () => {
+    let result;
+    
+    correctAnswerA && (result = 'A');
+    correctAnswerB && (result = 'B');
+    correctAnswerC && (result = 'C');
+    correctAnswerD && (result = 'D');
+
+    return result;
+  }
+
 
   const saveEdittedToken = (id, mode) => {
     const targetQuiz = quizToken[id];
@@ -107,6 +199,7 @@ const addQuiz = () => {
       targetQuiz.B        = inputBValue;
       targetQuiz.C        = inputCValue;
       targetQuiz.D        = inputDValue;
+      targetQuiz.correctAnswer = getCorrectAnswer();
     } 
     else if (mode === 'Cancel')
     {
@@ -116,6 +209,7 @@ const addQuiz = () => {
       targetQuiz.B;
       targetQuiz.C;
       targetQuiz.D;
+      targetQuiz.correctAnswer;
     } 
     
   }
@@ -144,6 +238,7 @@ const addQuiz = () => {
         killAllTokens(targetQuizToken.id, 'kill')
         disableProxy();
         assignValuesToTextFields(targetQuizToken);
+        // setCorrectAnswer(getCorrectAnswer());
         targetQuizToken.editable = true;
       }
 
@@ -163,6 +258,7 @@ const addQuiz = () => {
   }
 
   const cancelEditToken = (id) => {
+    
     const targetQuizToken = quizToken[id];
     disableProxy();
     assignValuesToTextFields(targetQuizToken);
@@ -171,6 +267,7 @@ const addQuiz = () => {
     targetQuizToken.editable = false;
     setToggleButton('On');
     killAllTokens('none', 'revive');
+    console.log(targetQuizToken.correctAnswer);
   }
   
   const deleteQuestionToken = (id) => {
@@ -191,31 +288,6 @@ const addQuiz = () => {
       addNewQuizToken(item);
       customId++;
     })
-  }
-
-  const setCorrectAnswer = (id ,letter) => {
-    const targetQuizToken = getQuizToken(id);
-    
-    if (targetQuizToken !== 'not_found')
-    {
-      switch (letter) {
-        case "A":
-          setCorrectAnswerA(true);
-          break;
-        case "B":
-          setCorrectAnswerB(true);
-          break;
-        case "C":
-          setCorrectAnswerC(true);
-          break;
-        case "D":
-          setCorrectAnswerD(true);
-          break;
-        default:
-          console.log('setting a correct answer is not executed');
-          break;
-      }
-    }
   }
 
   const renderItem = ({item}) => {
@@ -247,6 +319,17 @@ const addQuiz = () => {
                     editable={!disableField}
                     onChangeText={text => setInputAValue(text)}
                     />
+                    <TouchableOpacity style={styles.correctAnswerToggle}
+                    disabled={(item.status === 'dead')}
+                    onPress={()=>{setCorrectAnswer('A');}}
+                    >
+                      <MaterialIcons 
+                      name={(correctAnswerA === true && item.status === 'alive')? 'star': 'star-outline'}
+                      size={40} 
+                      selectable={undefined}
+                      color="#3C2F60"
+                      />
+                    </TouchableOpacity>
                   </View>
                   <View style={styles.choiceLetter}>
                     <Text style={styles.textPrimary}>B: </Text>
@@ -257,6 +340,17 @@ const addQuiz = () => {
                     editable={!disableField}
                     onChangeText={text => setInputBValue(text)}
                     />
+                    <TouchableOpacity style={styles.correctAnswerToggle}
+                    disabled={(item.status === 'dead')}
+                    onPress={()=>{setCorrectAnswer('B');}}
+                    >
+                      <MaterialIcons 
+                      name={(correctAnswerB === true && item.status === 'alive')? 'star': 'star-outline'}
+                      size={40} 
+                      selectable={undefined}
+                      color="#3C2F60"
+                      />
+                    </TouchableOpacity>
                   </View>
                   <View style={styles.choiceLetter}>
                     <Text style={styles.textPrimary}>C: </Text>
@@ -267,6 +361,17 @@ const addQuiz = () => {
                     editable={!disableField}
                     onChangeText={text => setInputCValue(text)}
                     />
+                    <TouchableOpacity style={styles.correctAnswerToggle}
+                    disabled={(item.status === 'dead')}
+                    onPress={()=>{setCorrectAnswer('C');}}
+                    >
+                      <MaterialIcons 
+                      name={(correctAnswerC === true && item.status === 'alive')? 'star': 'star-outline'}
+                      size={40} 
+                      selectable={undefined}
+                      color="#3C2F60"
+                      />
+                    </TouchableOpacity>
                   </View>
                   <View style={styles.choiceLetter}>
                     <Text style={styles.textPrimary}>D: </Text>
@@ -277,6 +382,28 @@ const addQuiz = () => {
                     editable={!disableField}
                     onChangeText={text => setInputDValue(text)}
                     />
+                    <TouchableOpacity style={styles.correctAnswerToggle}
+                    disabled={(item.status === 'dead')}
+                    onPress={()=>{setCorrectAnswer('D');}}
+                    >
+                      <MaterialIcons 
+                      name={(correctAnswerD === true && item.status === 'alive')? 'star': 'star-outline'}
+                      size={40} 
+                      selectable={undefined}
+                      color="#3C2F60"
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.correctAnswerField}>
+                    <Text 
+                    style={styles.textPrimary}>Correct Answer: </Text>
+                    <Text
+                    style={
+                      [item.status === 'alive' ? ((getCorrectAnswer() === undefined )? styles.textSecondary : styles.textPrimary) : styles.textSecondary]
+                    }
+                    >
+                      {(getCorrectAnswer() !== undefined && item.status === 'alive') ? getCorrectAnswer() : 'Click star to set correct answer!'}
+                      </Text>
                   </View>
                 </View>
               </View>
@@ -295,7 +422,6 @@ const addQuiz = () => {
                      disabled={item.status === 'alive' ? false : true}
                      style={[styles.editButton, toggleButton === 'Off' && item.editable && styles.editModeButton]}
                      onPress={()=>{editQuestionToken(item.id)}}>
-                      {/* <Text>{toggleButton === 'On' ? 'E' : 'S'}</Text> */}
                       <MaterialIcons
                       name={(!item.editable)? 'edit' : 'check'} 
                       size={24} 
@@ -333,12 +459,14 @@ const addQuiz = () => {
                     editable={item.editable}
                     onChangeText={text => setInputAValue(text)}
                     />
-                    <TouchableOpacity style={styles.correctAnswerToggle}>
+                    <TouchableOpacity style={styles.correctAnswerToggle}
+                    onPress={()=>{item.editable && setCorrectAnswer('A', item.id);}}
+                    >
                       <MaterialIcons 
-                      name={correctAnswerA === true ? 'star': 'star-outline'}
-                      size={24} 
+                      name={correctAnswerA === true || item.correctAnswer === 'A' ? 'star': 'star-outline'}
+                      size={40} 
                       selectable={undefined}
-                      color="#3C2F60"
+                      color={toggleButton === 'On' ? '#3C2F60' : (correctAnswerA === false ? '#9EC6F3' : '#3C2F60')}
                       />
                     </TouchableOpacity>
                   </View>
@@ -350,12 +478,14 @@ const addQuiz = () => {
                     editable={item.editable}
                     onChangeText={text => setInputBValue(text)}
                     />
-                    <TouchableOpacity style={styles.correctAnswerToggle}>
+                    <TouchableOpacity style={styles.correctAnswerToggle}
+                    onPress={()=>{item.editable && setCorrectAnswer('B', item.id);}}
+                    >
                       <MaterialIcons 
-                      name={correctAnswerB === true ? 'star': 'star-outline'}
-                      size={24} 
+                      name={correctAnswerB === true || item.correctAnswer === 'B'  ? 'star': 'star-outline'}
+                      size={40} 
                       selectable={undefined}
-                      color="#3C2F60"
+                      color={toggleButton === 'On' ? '#3C2F60' : (correctAnswerB === false ? '#9EC6F3' : '#3C2F60')}
                       />
                     </TouchableOpacity>
                   </View>
@@ -367,12 +497,14 @@ const addQuiz = () => {
                     editable={item.editable}
                     onChangeText={text => setInputCValue(text)}
                     />
-                    <TouchableOpacity style={styles.correctAnswerToggle}>
+                    <TouchableOpacity style={styles.correctAnswerToggle}
+                    onPress={()=>{item.editable && setCorrectAnswer('C', item.id);}}
+                    >
                       <MaterialIcons 
-                      name={correctAnswerC === true ? 'star': 'star-outline'}
-                      size={24} 
+                      name={correctAnswerC === true || item.correctAnswer === 'C'  ? 'star': 'star-outline'}
+                      size={40} 
                       selectable={undefined}
-                      color="#3C2F60"
+                      color={toggleButton === 'On' ? '#3C2F60' : (correctAnswerC === false ? '#9EC6F3' : '#3C2F60')}
                       />
                     </TouchableOpacity>
                   </View>
@@ -384,14 +516,27 @@ const addQuiz = () => {
                     editable={item.editable}
                     onChangeText={text => setInputDValue(text)}
                     />
-                    <TouchableOpacity style={styles.correctAnswerToggle}>
+                    <TouchableOpacity style={styles.correctAnswerToggle}
+                    onPress={()=>{item.editable && setCorrectAnswer('D', item.id);}}
+                    >
                       <MaterialIcons 
-                      name={correctAnswerD === true ? 'star': 'star-outline'}
-                      size={24} 
+                      name={correctAnswerD === true || item.correctAnswer === 'D'  ? 'star': 'star-outline'}
+                      size={40} 
                       selectable={undefined}
-                      color="#3C2F60"
+                      color={toggleButton === 'On' ? '#3C2F60' : (correctAnswerD === false ? '#9EC6F3' : '#3C2F60')}
                       />
                     </TouchableOpacity>
+                  </View>
+                  <View style={styles.correctAnswerField}>
+                    <Text 
+                    style={styles.textPrimary}>Correct Answer: </Text>
+                    <Text
+                    style={
+                      [styles.textPrimary]
+                    }
+                    >
+                      { toggleButton === 'On' ? (item.correctAnswer !== undefined && item.correctAnswer) : getCorrectAnswer()}
+                      </Text>
                   </View>
                 </View>
               </View>
@@ -404,6 +549,7 @@ const addQuiz = () => {
     setInputBValue('');
     setInputCValue('');
     setInputDValue('');
+    clearAnswerOptions();
   }
 
   const addNewQuestionToken = () => {
@@ -420,6 +566,8 @@ const addQuiz = () => {
       "c": choiceC,
       "d": choiceD,
     };
+
+    const correctAnswer = getCorrectAnswer();
 
     // const id = [...quizToken].length === 0 && 0;
     let id;
@@ -442,7 +590,7 @@ const addQuiz = () => {
       "B":choiceB,
       "C":choiceC,
       "D":choiceD,
-      "correctAnswer" : '',
+      "correctAnswer" : correctAnswer,
     }
 
     addNewQuizToken(newQuizToken);
@@ -451,15 +599,81 @@ const addQuiz = () => {
   }
 
   const tryPrint = () => {
-    console.log(quizToken);
+    console.log(finalQuizTokenArray);
   }
+
+  const quizTokenBinding = (title,items) => {
+    let theFinalQuizToken;
+    let id;
+    let questions      = [];
+    let choices        = [];
+    let correctAnswers = [];
+
+    const questionTokens = items.filter((item)=>{
+      if (item.id !== 0)
+      {
+        return true;
+      }
+    })
+
+    questionTokens.forEach((item)=>{
+      questions.push(item.question);
+    });
+
+    questionTokens.forEach((item)=>{
+      choices.push({
+        "a" : item.A,
+        "b" : item.B,
+        "c" : item.C,
+        "d" : item.D
+      })
+    });
+
+    questionTokens.forEach((item)=>{
+      const letter  = item.correctAnswer;
+      const letterOfChoice = (letter).toLowerCase();
+      const details = item[letter];
+
+      correctAnswers.push({ [letterOfChoice] : details});
+    });
+
+    finalQuizTokenArray.length === 0 ? id = 1 : (id = Number(finalQuizTokenArray.length) + 1);
+
+    theFinalQuizToken = {
+      "id": id,
+      "title": title,
+      "questions": questions,
+      "choices": choices,
+      "correctAnswers": correctAnswers,
+    };
+
+    console.log(theFinalQuizToken);
+
+    setFinalQuizTokenArray(prev => [...prev, theFinalQuizToken]);
+    
+  }
+
+  const clearQuizCollection = async () => {
+  try {
+    await AsyncStorage.removeItem("quizCollection");
+    console.log("quizCollection removed");
+  } catch (e) {
+    console.error("Failed to remove quizCollection:", e);
+  }
+};
+
 
   return (
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.backButton}>
+        <Link
+        href='/quizMenu'
+        style={styles.backButton}
+        >
+        <TouchableOpacity >
           <Text style={[styles.textPrimary, styles.backButtonText]}>Back</Text>
         </TouchableOpacity>
+        </Link>
         <View style={styles.header}>
           <Text style={styles.headerText}>Create Your Own Quiz!</Text>
         </View>
@@ -484,7 +698,7 @@ const addQuiz = () => {
             <TouchableOpacity style={styles.addNewButton} onPress={()=>{addNewQuestionToken()}}>
               <Text style={[styles.textPrimary, styles.saveButtonText]}>Add new question</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.saveButton} onPress={()=>{tryPrint()}}>
+            <TouchableOpacity style={styles.saveButton} onPress={()=>{quizTokenBinding(inputTitleValue, quizToken); tryPrint();}}>
               <Text style={[styles.textPrimary, styles.saveButtonText]}> Save </Text>
             </TouchableOpacity>
         </View>
@@ -559,11 +773,19 @@ const webStyles = StyleSheet.create({
     paddingHorizontal: 10,
     width: '100%',
   },
+  correctAnswerField: {
+    backgroundColor: 'white',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    borderRadius: 8,
+  },
   questionContainer: {
     position: 'relative',
     backgroundColor: 'white',
     width: '80%',
-    height: '55%',
+    height: '60%',
     borderRadius: 8,
     flexDirection: 'column',
     justifyContent: 'center',
@@ -672,5 +894,9 @@ const webStyles = StyleSheet.create({
   },
   editModeButton: {
     backgroundColor: 'white'
+  },
+  correctAnswerToggle: {
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 })
