@@ -40,7 +40,7 @@ export default function RootLayout() {
       <Stack.Screen name="addQuiz" options={{ headerShown: false, title: 'AddQuiz'}}/>
       <Stack.Screen name="index" options={{ headerShown: false, title: 'index' }} />
       <Stack.Screen name="menu" options={{ headerShown: true, title: 'Menu', headerTitle: 'Coffee Shop Menu' }} />
-      <Stack.Screen name="contact" options={{ headerShown: true, title: 'Contact', headerTitle: 'Contact Us' }} />
+      <Stack.Screen name="about" options={{ headerShown: false, title: 'About', headerTitle: 'About page' }} />
       <Stack.Screen name="+not-found"  options={{headerShown: false}} />
     </Stack><StatusBar style="auto"/></>
 

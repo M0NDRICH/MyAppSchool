@@ -61,16 +61,21 @@ const home = () => {
   }, [quizzes])
 
   const removeQuiz = (idToRemove) => {
-  const updated = quizzes
-      .filter(item => item.id !== idToRemove)
-      .map((item, index) => ({
-        ...item,
-        id: index + 1, // reassigns new sequential ID
-      }));
+    if (!temporary)
+    {
+      const updated = quizzes
+        .filter(item => item.id !== idToRemove);
 
-    setTemporaryQuizzes(data.sort((a,b) => b.id - a.id))
+      setQuizzes(updated);
+    }
+    else if (temporary)
+    {
+       const updated = quizzes
+        .filter(item => item.id !== idToRemove);
 
-    setQuizzes(updated.sort((a, b) => b.id - a.id));
+        setTemporaryQuizzes(updated);
+    }
+    
   };
 
 
@@ -101,6 +106,11 @@ const home = () => {
       </TouchableOpacity>
     </View>
   )
+
+  if (!quizzes || !temporaryQuizzes)
+  {
+    return <View><Text>Loading...</Text></View>
+  }
 
   return (
     <SafeAreaView style={styles.safeContainer}>

@@ -48,11 +48,11 @@ const app = () => {
         </Pressable>
         </Link>
         <Link 
-        href="/contact" 
+        href="/about" 
         style={{ marginHorizontal: 'auto' }}
         asChild>
         <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>Contact Us</Text>
+          <Text style={styles.buttonText}>About</Text>
         </Pressable>
         </Link>
 
@@ -313,18 +313,6 @@ const webStyles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
-  // button: {
-  //   backgroundColor: '#9EC6F3',
-  //   padding: 10,
-  //   borderRadius: 5,
-  //   width: '80%',
-  // },
-  // buttonText: {
-  //   textAlign: 'center',
-  //   color: 'white',
-  //   fontSize: 16,
-  //   fontWeight: 'bold',
-  // },
   button: {
     height: 40,
     width: windowWidth * 0.50,

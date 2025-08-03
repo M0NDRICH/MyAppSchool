@@ -4,7 +4,7 @@
     "slug": "MyApp",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/coffee-icon.png",
+    "icon": "./assets/images/MyApp-Logo.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -22,17 +22,17 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/MyApp-Logo.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/coffee-splash.png",
+          "image": "./assets/images/MyApp-Logo.png",
           "imageWidth": 200,
           "resizeMode": "cover",
-          "backgroundColor": "#000000"
+          "backgroundColor": "#FFF1D5"
         }
       ]
     ],

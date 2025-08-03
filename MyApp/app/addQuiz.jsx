@@ -602,6 +602,12 @@ const addQuiz = () => {
     console.log(finalQuizTokenArray);
   }
 
+  const generateNextId = (quizzes) => {
+    if (quizzes.length === 0) return 1;
+    return Math.max(...quizzes.map(q => q.id)) + 1;
+  };
+
+
   const quizTokenBinding = (title,items) => {
     let theFinalQuizToken;
     let id;
@@ -637,7 +643,9 @@ const addQuiz = () => {
       correctAnswers.push({ [letterOfChoice] : details});
     });
 
-    finalQuizTokenArray.length === 0 ? id = 1 : (id = Number(finalQuizTokenArray.length) + 1);
+    // finalQuizTokenArray.length === 0 ? id = 1 : (id = Number(finalQuizTokenArray.length) + 1);
+
+    id = generateNextId(finalQuizTokenArray);
 
     theFinalQuizToken = {
       "id": id,
@@ -649,7 +657,7 @@ const addQuiz = () => {
 
     console.log(theFinalQuizToken);
 
-    setFinalQuizTokenArray(prev => [...prev, theFinalQuizToken]);
+    setFinalQuizTokenArray(prev => [theFinalQuizToken, ...prev ]);
     
   }
 
@@ -669,6 +677,7 @@ const addQuiz = () => {
         <Link
         href='/quizMenu'
         style={styles.backButton}
+        asChild
         >
         <TouchableOpacity >
           <Text style={[styles.textPrimary, styles.backButtonText]}>Back</Text>
