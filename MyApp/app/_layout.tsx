@@ -5,7 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { Appearance, Platform } from 'react-native';
 
 import { Colors } from '@/constants/Colors';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -34,15 +34,14 @@ export default function RootLayout() {
       <><Stack 
       initialRouteName='index'
       screenOptions={{ headerStyle: { backgroundColor: theme.headerBackground }, headerTintColor: theme.text, headerShadowVisible: false }}>
-      <Stack.Screen name="quizMenu" options={{ headerShown: false, title: 'LandPage'}}/>
-      <Stack.Screen name="resultQuiz" options={{ headerShown: false, title: 'resultQuiz'}}/>
-      <Stack.Screen name="playQuiz" options={{ headerShown: false, title: 'PlayQuiz'}}/>
-      <Stack.Screen name="addQuiz" options={{ headerShown: false, title: 'AddQuiz'}}/>
-      <Stack.Screen name="index" options={{ headerShown: false, title: 'index' }} />
-      <Stack.Screen name="menu" options={{ headerShown: true, title: 'Menu', headerTitle: 'Coffee Shop Menu' }} />
-      <Stack.Screen name="about" options={{ headerShown: false, title: 'About', headerTitle: 'About page' }} />
+      <Stack.Screen name="quizMenu"    options={{ headerShown: false, title: 'LandPage'}}/>
+      <Stack.Screen name="resultQuiz"  options={{ headerShown: false, title: 'resultQuiz'}}/>
+      <Stack.Screen name="playQuiz"    options={{ headerShown: false, title: 'PlayQuiz'}}/>
+      <Stack.Screen name="addQuiz"     options={{ headerShown: false, title: 'AddQuiz'}}/>
+      <Stack.Screen name="index"       options={{ headerShown: false, title: 'index' }} />
+      <Stack.Screen name="menu"        options={{ headerShown: true,  title: 'Menu', headerTitle: 'Coffee Shop Menu' }} />
+      <Stack.Screen name="about"       options={{ headerShown: false, title: 'About', headerTitle: 'About page' }} />
       <Stack.Screen name="+not-found"  options={{headerShown: false}} />
     </Stack><StatusBar style="auto"/></>
-
   );
 }

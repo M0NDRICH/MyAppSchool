@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, FlatList, Platform, TextInput, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, Pressable, FlatList, Platform, TextInput, TouchableOpacity, } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Link } from 'expo-router'
 import { MaterialIcons } from '@expo/vector-icons'
@@ -6,8 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { useState, useEffect } from 'react'
 
 const addQuiz = () => {
-  // const styles = Platform.OS === 'web' ? webStyles : mobileStyles;
-  const styles = webStyles;
+  const styles = Platform.OS === 'web' ? webStyles : mobileStyles;
   
   const [inputQuestionValue,   setInputQuestionValue] = useState('');
   const [inputTitleValue,         setInputTitleValue] = useState('');
@@ -84,7 +83,7 @@ const addQuiz = () => {
     toggleButton === 'On' ? quizToken[0].editable = false : quizToken[0].editable = true;
   }
 
-  // For setting up the proxy token once the page is rendering
+  // For setting up the proxy token once the page is rendered
   useEffect(()=>{
     addNewQuizToken(sampleQuestionToken);
   }, []);
@@ -607,6 +606,14 @@ const addQuiz = () => {
     return Math.max(...quizzes.map(q => q.id)) + 1;
   };
 
+  const renderHeader = () => {
+    if (Platform.OS === 'web') {
+      return <View style={styles.header}>
+              <Text style={styles.headerText}>Create Your Own Quiz!</Text>
+            </View>
+    }
+    return null;
+  }
 
   const quizTokenBinding = (title,items) => {
     let theFinalQuizToken;
@@ -673,6 +680,7 @@ const addQuiz = () => {
 
   return (
     <SafeAreaView style={styles.safeContainer}>
+      
       <View style={styles.container}>
         <Link
         href='/quizMenu'
@@ -683,9 +691,7 @@ const addQuiz = () => {
           <Text style={[styles.textPrimary, styles.backButtonText]}>Back</Text>
         </TouchableOpacity>
         </Link>
-        <View style={styles.header}>
-          <Text style={styles.headerText}>Create Your Own Quiz!</Text>
-        </View>
+        {renderHeader()}
         <View style={styles.titleContainer}>
           <Text style={styles.textPrimary}>Title: </Text>
           <TextInput
@@ -696,16 +702,21 @@ const addQuiz = () => {
           />
         </View>
         <View style={styles.questionContainer}>
-          <FlatList
-          style={styles.quizTokenContainer}
-          data={quizToken}
-          renderItem={renderItem}
-          keyExtractor={quizToken => quizToken.id}
-          />
+          {/* <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={{ flex: 1 }}
+          > */}
+            <FlatList
+            style={styles.quizTokenContainer}
+            data={quizToken}
+            renderItem={renderItem}
+            keyExtractor={quizToken => quizToken.id}
+            />
+          {/* </KeyboardAvoidingView> */}
         </View>
         <View style={styles.buttonArea}>
             <TouchableOpacity style={styles.addNewButton} onPress={()=>{addNewQuestionToken()}}>
-              <Text style={[styles.textPrimary, styles.saveButtonText]}>Add new question</Text>
+              <Text style={[styles.textPrimary, styles.saveButtonText]}>Add new</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.saveButton} onPress={()=>{quizTokenBinding(inputTitleValue, quizToken); tryPrint();}}>
               <Text style={[styles.textPrimary, styles.saveButtonText]}> Save </Text>
@@ -838,6 +849,7 @@ const webStyles = StyleSheet.create({
   quizTokenContainer: {
     width: '100%',
     height: '20%',
+    backgroundColor: 'black',
   },
   questionCard: {
     backgroundColor: '#BDDDE4',
@@ -877,6 +889,218 @@ const webStyles = StyleSheet.create({
     width: '100%',
   },
   buttonArea: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  addNewButton: {
+    backgroundColor: '#9EC6F3',
+    borderRadius: 8,
+    width: '30%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  saveButton: {
+    backgroundColor: '#9EC6F3',
+    borderRadius: 8,
+    width: '30%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    color:  'white',
+  },
+  editMode: {
+    backgroundColor: '#9EC6F3',
+  },
+  editModeButton: {
+    backgroundColor: 'white'
+  },
+  correctAnswerToggle: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  }
+})
+
+const mobileStyles = StyleSheet.create({
+  safeContainer: {
+    backgroundColor: '#FFF1D5',
+    width: '100%',
+    height: '100%',
+    paddingVertical: 20,
+  },
+  container: {
+    position: 'relative',
+    width: '100%',
+    height: '100%',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 0,
+    left: 20,
+    backgroundColor: '#9EC6F3',
+    borderRadius: 8,
+    paddingHorizontal: 20,
+  },
+  backButtonText: {
+    color: 'white',
+  },
+  header: {
+    backgroundColor: 'white',
+    width: '80%',
+    height: '20%',
+    justifyContent: 'center',
+    borderRadius: 8,
+    marginTop: 50,
+    marginBottom: 10,
+  },
+  headerText: {
+    textAlign: 'center',
+    color: '#3C2F60',
+    fontWeight: 'bold',
+    fontSize: 24,
+  },
+  titleContainer: {
+    backgroundColor: 'white',
+    width: '80%',
+    borderRadius: 8,
+    flexDirection: 'row',
+    marginVertical: 10,
+  },
+  textPrimary: {
+    color: '#3C2F60',
+    fontWeight: 'bold',
+    fontSize: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+  },
+  textSecondary: {
+    color: '#3C2F60',
+    fontWeight: 500,
+    fontSize: 16,
+  },
+  textField: {
+    paddingHorizontal: 10,
+    width: '100%',
+  },
+  correctAnswerField: {
+    backgroundColor: 'white',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+    height: 70,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  questionContainer: {
+    position: 'relative',
+    backgroundColor: 'white',
+    width: '95%',
+    height: '70%',
+    borderRadius: 8,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    marginVertical: 10,
+  },
+  numOfCard: {
+    alignSelf: 'flex-start',
+    marginLeft: 15,
+    backgroundColor: 'white',
+    borderRadius: 8,
+  },
+  questionCardHeader: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  rightSideHeader: {
+    width: '20%',
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginRight: 15,
+  },
+  editButton: {
+    backgroundColor: "#9EC6F3",
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+  },
+  deleteButton: {
+    backgroundColor: "#9EC6F3",
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+  },
+  quizTokenContainer: {
+    width: '100%',
+    // height: '20%',
+    borderWidth: 2,
+    borderColor: 'black',
+    borderStyle: 'solid',
+  },
+  questionCard: {
+    backgroundColor: '#BDDDE4',
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+    borderRadius: 8,
+    // width: '95%',
+    // height: '100%',
+    flexGrow: 1,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'red',
+    borderStyle: 'solid',
+  },
+  question: {
+    backgroundColor: 'white',
+    width: '95%',
+    borderRadius: 8,
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  questionInputText: {
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    marginVertical: 10,
+    marginHorizontal: 10,
+    width: '97%',
+  },
+  questionChoices: {
+    width: '95%',
+  },
+  choiceLetter: {
+    position: 'relative',
+    height: 100,
+    backgroundColor: 'white',
+    width: '100%',
+    borderRadius: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginVertical: 10,
+  },
+  choiceInputField: {
+    position: 'absolute',
+    bottom: 0,
+    paddingHorizontal: 10,
+    width: '100%',
+    borderWidth: 2,
+    borderColor: 'black',
+    borderStyle: 'solid',
+  },
+  buttonArea: {
+    position: 'absolute',
+    bottom: -20,
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',

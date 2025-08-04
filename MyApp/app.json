@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "MyApp",
-    "slug": "MyApp",
+    "name": "Quiz App",
+    "slug": "quiz-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/MyApp-Logo.png",
-    "scheme": "myapp",
+    "icon": "./assets/images/icons/adaptive-icon.png",
+    "scheme": "Quizapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -13,8 +13,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#000000"
+        "foregroundImage": "./assets/images/icons/adaptive-icon.png",
+        "backgroundColor": "#FFF1D5"
       },
 
       "edgeToEdgeEnabled": true
@@ -22,16 +22,16 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/MyApp-Logo.png"
+      "favicon": "./assets/images/icons/adaptive-icon.png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/MyApp-Logo.png",
+          "image": "./assets/images/icons/splash-icon-dark.png",
           "imageWidth": 200,
-          "resizeMode": "cover",
+          "resizeMode": "contain",
           "backgroundColor": "#FFF1D5"
         }
       ]
