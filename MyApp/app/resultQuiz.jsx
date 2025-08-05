@@ -6,6 +6,7 @@ import { myAnswers } from '@/data/quizAnswers'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { data } from '@/data/quizzes'
 import playQuiz from './playQuiz'
+import { styles } from '@/components/styles/resultQuiz'
 
 
 // TODO: choii create a card to display the score then create a button that will redirect to page where the user can see the answers and questions, basically a review
@@ -185,85 +186,3 @@ const resultQuiz = () => {
 
 export default resultQuiz
 
-const styles = StyleSheet.create({
-  safeContainer: {
-    position: 'relative',
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#FFF1D5',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 40,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    backgroundColor: '#9EC6F3',
-    width: '15%',
-    height: 50,
-    borderRadius: 8,
-    marginTop: '5%',
-    marginLeft: '5%',
-    justifyContent: 'center',
-    alignItems: 'center', 
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  resultCard: {
-    backgroundColor: '#BDDDE4',
-    width: '80%',
-    height: '60%',
-    borderRadius: 8,
-    gap: 20,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  resultCardMainBody: {
-    position: 'relative',
-    backgroundColor: 'white',
-    width: '90%',
-    height: 250,
-    borderRadius: 8,
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-  },
-  resultTextTitle: {
-    position: 'absolute',
-    left: 20,
-    top: 20,
-    width: '100%',
-    textAlign: 'left',
-    fontWeight: 'bold',
-    fontSize: 24,
-    color: '#3C2F60',
-  },
-  resultText: {
-    width: '100%',
-    textAlign: 'center',
-    color: '#3C2F60',
-    fontWeight: 'bold',
-    fontSize: 24,
-  },
-  buttonReviewAnswers: {
-    backgroundColor: '#9EC6F3',
-    width: '90%',
-    height: 50,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  okButton: {
-    backgroundColor: '#9EC6F3',
-    width: '80%',
-    height: 50,
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  }
-})

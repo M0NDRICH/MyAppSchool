@@ -6,6 +6,9 @@ import { Appearance, Platform } from 'react-native';
 
 import { Colors } from '@/constants/Colors';
 import { useEffect, useState } from 'react';
+import { Provider as PaperProvider, MD3LightTheme,
+  MD3DarkTheme } from 'react-native-paper';
+
 
 SplashScreen.preventAutoHideAsync();
 
@@ -13,6 +16,7 @@ export default function RootLayout() {
   const colorScheme = Appearance.getColorScheme();
 
   const theme = colorScheme === 'dark' ? Colors.dark : Colors.light;
+  const paperTheme = colorScheme === 'dark'  ? MD3DarkTheme : MD3LightTheme;
 
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -30,7 +34,7 @@ export default function RootLayout() {
   }
 
   return (
-
+    <PaperProvider theme={paperTheme}>
       <><Stack 
       initialRouteName='index'
       screenOptions={{ headerStyle: { backgroundColor: theme.headerBackground }, headerTintColor: theme.text, headerShadowVisible: false }}>
@@ -43,5 +47,6 @@ export default function RootLayout() {
       <Stack.Screen name="about"       options={{ headerShown: false, title: 'About', headerTitle: 'About page' }} />
       <Stack.Screen name="+not-found"  options={{headerShown: false}} />
     </Stack><StatusBar style="auto"/></>
+  </PaperProvider>
   );
 }
