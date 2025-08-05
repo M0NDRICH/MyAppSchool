@@ -1,9 +1,9 @@
-import { View, Text, StyleSheet, Pressable, FlatList, Platform, TextInput, TouchableOpacity, } from 'react-native'
+import { View, Text, StyleSheet, Pressable, FlatList, Platform, TextInput, TouchableOpacity, KeyboardAvoidingView} from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Link } from 'expo-router'
+import { Link, router } from 'expo-router'
 import { MaterialIcons } from '@expo/vector-icons'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 
 const addQuiz = () => {
   const styles = Platform.OS === 'web' ? webStyles : mobileStyles;
@@ -31,12 +31,12 @@ const addQuiz = () => {
     "status":"alive",
     "editable": true,
     "id": 0,
-    "question":"What does the fox says?",
-    "A":"fox fox fox fooox",
-    "B":"Awww awww awww awww",
-    "C":"Ting ning ning ning",
-    "D":"Ahh Daddy!",
-    "correctAnswer":"C",
+    "question":"Who was the philosopher of the Art of Happiness?",
+    "A":"Epicurus",
+    "B":"Aristotle",
+    "C":"Plato",
+    "D":"Socrates",
+    "correctAnswer":"A",
   };
 
   useEffect(() => {
@@ -94,6 +94,10 @@ const addQuiz = () => {
 
     return targetQuizToken;
   }
+
+  const goToQuizMenu = () => {
+    router.push('/quizMenu');
+  };
 
   // this function kills or disables all the buttons except the quizToken that invokes it
   // id:      id of the quizToken that invokes the function thus making the quizToken immune to killing or disabling function
@@ -222,7 +226,7 @@ const addQuiz = () => {
   //                                       During in edit mode the icon of the button will change to 'check icon' and also
   //                                       will set the the toggleButton = 'Off'.
   // if toggleButton is equals to 'Off' => the icon of the button will appear as an 'check icon' instead of an 'edit icon'.
-  //                                       If click it will run the saveEdittedTokeng() in which it will handle the values and then
+  //                                       If click it will run the saveEdittedToken() in which it will handle the values and then
   //                                       reassign or modify the values of the current quizToken that invokes it, then save to the 
   //                                       quizToken array. Then run some of the other functions and lastly it will set the toggleButton = 'On'.
   const editQuestionToken = (id) => {
@@ -289,123 +293,377 @@ const addQuiz = () => {
     })
   }
 
-  const renderItem = ({item}) => {
+  // const ProxyQuestionCard = React.memo(({item})=>{
+  //   return (
+  //     <View style={styles.questionCard}
+  //       key={item.id}
+  //       >
+  //         <View style={styles.numOfCard}>
+  //           <Text style={styles.textPrimary}>#{Number(item.id)}</Text>
+  //         </View>
+  //         <View style={styles.question}>
+  //           <Text style={[styles.textPrimary]}>Question: </Text>
+  //           <TextInput
+  //           style={[styles.textSecondary, styles.questionInputText]}
+  //           placeholder='Type the question here...'
+  //           value={!disableField ? inputQuestionValue : ''}
+  //           editable={!disableField}
+  //           onChangeText={text => setInputQuestionValue(text)}
+  //           />
+  //         </View>
+  //         <View style={styles.questionChoices}>
+  //           <View style={styles.choiceLetter}>
+  //             <Text style={styles.textPrimary}>A: </Text>
+  //             <TextInput
+  //             style={[styles.textSecondary, styles.choiceInputField]}
+  //             placeholder='Type text here for A...'
+  //             value={!disableField ? inputAValue : ''}
+  //             editable={!disableField}
+  //             onChangeText={text => setInputAValue(text)}
+  //             />
+  //             <TouchableOpacity style={styles.correctAnswerToggle}
+  //             disabled={(item.status === 'dead')}
+  //             onPress={()=>{setCorrectAnswer('A');}}
+  //             >
+  //               <MaterialIcons 
+  //               name={(correctAnswerA === true && item.status === 'alive')? 'star': 'star-outline'}
+  //               size={40} 
+  //               selectable={undefined}
+  //               color="#3C2F60"
+  //               />
+  //             </TouchableOpacity>
+  //           </View>
+  //           <View style={styles.choiceLetter}>
+  //             <Text style={styles.textPrimary}>B: </Text>
+  //             <TextInput
+  //             style={[styles.textSecondary, styles.choiceInputField]}
+  //             placeholder='Type text here for B...'
+  //             value={!disableField ? inputBValue : ''}
+  //             editable={!disableField}
+  //             onChangeText={text => setInputBValue(text)}
+  //             />
+  //             <TouchableOpacity style={styles.correctAnswerToggle}
+  //             disabled={(item.status === 'dead')}
+  //             onPress={()=>{setCorrectAnswer('B');}}
+  //             >
+  //               <MaterialIcons 
+  //               name={(correctAnswerB === true && item.status === 'alive')? 'star': 'star-outline'}
+  //               size={40} 
+  //               selectable={undefined}
+  //               color="#3C2F60"
+  //               />
+  //             </TouchableOpacity>
+  //           </View>
+  //           <View style={styles.choiceLetter}>
+  //             <Text style={styles.textPrimary}>C: </Text>
+  //             <TextInput
+  //             style={[styles.textSecondary, styles.choiceInputField]}
+  //             placeholder='Type text here for C...'
+  //             value={!disableField ? inputCValue : ''}
+  //             editable={!disableField}
+  //             onChangeText={text => setInputCValue(text)}
+  //             />
+  //             <TouchableOpacity style={styles.correctAnswerToggle}
+  //             disabled={(item.status === 'dead')}
+  //             onPress={()=>{setCorrectAnswer('C');}}
+  //             >
+  //               <MaterialIcons 
+  //               name={(correctAnswerC === true && item.status === 'alive')? 'star': 'star-outline'}
+  //               size={40} 
+  //               selectable={undefined}
+  //               color="#3C2F60"
+  //               />
+  //             </TouchableOpacity>
+  //           </View>
+  //           <View style={styles.choiceLetter}>
+  //             <Text style={styles.textPrimary}>D: </Text>
+  //             <TextInput
+  //             style={[styles.textSecondary, styles.choiceInputField]}
+  //             placeholder='Type text here for D...'
+  //             value={!disableField ? inputDValue : ''}
+  //             editable={!disableField}
+  //             onChangeText={text => setInputDValue(text)}
+  //             />
+  //             <TouchableOpacity style={styles.correctAnswerToggle}
+  //             disabled={(item.status === 'dead')}
+  //             onPress={()=>{setCorrectAnswer('D');}}
+  //             >
+  //               <MaterialIcons 
+  //               name={(correctAnswerD === true && item.status === 'alive')? 'star': 'star-outline'}
+  //               size={40} 
+  //               selectable={undefined}
+  //               color="#3C2F60"
+  //               />
+  //             </TouchableOpacity>
+  //           </View>
+  //           <View style={styles.correctAnswerField}>
+  //             <Text 
+  //             style={styles.textPrimary}>Correct Answer: </Text>
+  //             <Text
+  //             style={
+  //               [item.status === 'alive' ? ((getCorrectAnswer() === undefined )? styles.textSecondary : styles.textPrimary) : styles.textSecondary]
+  //             }
+  //             >
+  //               {(getCorrectAnswer() !== undefined && item.status === 'alive') ? getCorrectAnswer() : 'Click star to set correct answer!'}
+  //               </Text>
+  //           </View>
+  //         </View>
+  //       </View>
+  //   );
+  // });
+
+  // const EditableQuestionCard = React.memo(({item})=> {
+  //   return (
+  //      <View style={[styles.questionCard, toggleButton === 'Off' && item.editable && styles.editMode]}
+  //             key={item.id}
+  //             >
+  //               <View style={styles.questionCardHeader}>
+  //                 <View style={styles.numOfCard}>
+  //                   <Text style={styles.textPrimary}>#{Number(item.id)}</Text>
+  //                 </View>
+  //                 <View style={styles.rightSideHeader}>
+  //                   <TouchableOpacity
+  //                    disabled={item.status === 'alive' ? false : true}
+  //                    style={[styles.editButton, toggleButton === 'Off' && item.editable && styles.editModeButton]}
+  //                    onPress={()=>{editQuestionToken(item.id)}}>
+  //                     <MaterialIcons
+  //                     name={(!item.editable)? 'edit' : 'check'} 
+  //                     size={24} 
+  //                     color='black'
+  //                     selectable={undefined}/>
+  //                   </TouchableOpacity>
+  //                   <TouchableOpacity
+  //                    disabled={item.status === 'alive' ? false : true}
+  //                    style={[styles.deleteButton, toggleButton === 'Off' && item.editable  && styles.editModeButton]}
+  //                    onPress=
+  //                    {()=>{if (toggleButton === 'On' && !item.editable) {deleteQuestionToken(item.id);} else { cancelEditToken(item.id);}}}>
+  //                     <MaterialIcons 
+  //                     name={(!item.editable) ? "delete" : "clear" } 
+  //                     size={24} 
+  //                     color={(!item.editable) ? "black" : "red"} 
+  //                     selectable={undefined}/>
+  //                   </TouchableOpacity>
+  //                 </View>
+  //               </View>
+  //               <View style={styles.question}>
+  //                 <Text style={[styles.questionText, styles.textPrimary]}>Question: </Text>
+  //                 <TextInput
+  //                 style={[styles.textSecondary, styles.questionInputText]}
+  //                 value={item.editable ? inputQuestionValue : item.question}
+  //                 editable={item.editable}
+  //                 onChangeText={text => setInputQuestionValue(text)}
+  //                 />
+  //               </View>
+  //               <View style={styles.questionChoices}>
+  //                 <View style={styles.choiceLetter}>
+  //                   <Text style={styles.textPrimary}>A: </Text>
+  //                   <TextInput
+  //                   style={[styles.textSecondary, styles.choiceInputField]}
+  //                   value={item.editable ? inputAValue : item.A}
+  //                   editable={item.editable}
+  //                   onChangeText={text => setInputAValue(text)}
+  //                   />
+  //                   <TouchableOpacity style={styles.correctAnswerToggle}
+  //                   onPress={()=>{item.editable && setCorrectAnswer('A', item.id);}}
+  //                   >
+  //                     <MaterialIcons 
+  //                     name={ toggleButton === 'Off'&&(correctAnswerA === true) || item.correctAnswer === 'A' ? 'star': 'star-outline'}
+  //                     size={40} 
+  //                     selectable={undefined}
+  //                     color={toggleButton === 'On' ? '#3C2F60' : (correctAnswerA === false ? '#9EC6F3' : '#3C2F60')}
+  //                     />
+  //                   </TouchableOpacity>
+  //                 </View>
+  //                 <View style={styles.choiceLetter}>
+  //                   <Text style={styles.textPrimary}>B: </Text>
+  //                   <TextInput
+  //                   style={[styles.textSecondary, styles.choiceInputField]}
+  //                   value={item.editable ? inputBValue : item.B}
+  //                   editable={item.editable}
+  //                   onChangeText={text => setInputBValue(text)}
+  //                   />
+  //                   <TouchableOpacity style={styles.correctAnswerToggle}
+  //                   onPress={()=>{item.editable && setCorrectAnswer('B', item.id);}}
+  //                   >
+  //                     <MaterialIcons 
+  //                     name={toggleButton === 'Off'&&(correctAnswerB === true )|| item.correctAnswer === 'B'  ? 'star': 'star-outline'}
+  //                     size={40} 
+  //                     selectable={undefined}
+  //                     color={toggleButton === 'On' ? '#3C2F60' : (correctAnswerB === false ? '#9EC6F3' : '#3C2F60')}
+  //                     />
+  //                   </TouchableOpacity>
+  //                 </View>
+  //                 <View style={styles.choiceLetter}>
+  //                   <Text style={styles.textPrimary}>C: </Text>
+  //                   <TextInput
+  //                   style={[styles.textSecondary, styles.choiceInputField]}
+  //                   value={item.editable ? inputCValue : item.C}
+  //                   editable={item.editable}
+  //                   onChangeText={text => setInputCValue(text)}
+  //                   />
+  //                   <TouchableOpacity style={styles.correctAnswerToggle}
+  //                   onPress={()=>{item.editable && setCorrectAnswer('C', item.id);}}
+  //                   >
+  //                     <MaterialIcons 
+  //                     name={toggleButton === 'Off'&&(correctAnswerC === true) || item.correctAnswer === 'C'  ? 'star': 'star-outline'}
+  //                     size={40} 
+  //                     selectable={undefined}
+  //                     color={toggleButton === 'On' ? '#3C2F60' : (correctAnswerC === false ? '#9EC6F3' : '#3C2F60')}
+  //                     />
+  //                   </TouchableOpacity>
+  //                 </View>
+  //                 <View style={styles.choiceLetter}>
+  //                   <Text style={styles.textPrimary}>D: </Text>
+  //                   <TextInput
+  //                   style={[styles.textSecondary, styles.choiceInputField]}
+  //                   value={item.editable ? inputDValue : item.D}
+  //                   editable={item.editable}
+  //                   onChangeText={text => setInputDValue(text)}
+  //                   />
+  //                   <TouchableOpacity style={styles.correctAnswerToggle}
+  //                   onPress={()=>{item.editable && setCorrectAnswer('D', item.id);}}
+  //                   >
+  //                     <MaterialIcons 
+  //                     name={toggleButton === 'Off'&&(correctAnswerD === true) || item.correctAnswer === 'D'  ? 'star': 'star-outline'}
+  //                     size={40} 
+  //                     selectable={undefined}
+  //                     color={toggleButton === 'On' ? '#3C2F60' : (correctAnswerD === false ? '#9EC6F3' : '#3C2F60')}
+  //                     />
+  //                   </TouchableOpacity>
+  //                 </View>
+  //                 <View style={styles.correctAnswerField}>
+  //                   <Text 
+  //                   style={styles.textPrimary}>Correct Answer: </Text>
+  //                   <Text
+  //                   style={
+  //                     [styles.textPrimary]
+  //                   }
+  //                   >
+  //                     { toggleButton === 'On' ? (item.correctAnswer !== undefined && item.correctAnswer) : getCorrectAnswer()}
+  //                     </Text>
+  //                 </View>
+  //               </View>
+  //             </View>
+  //   )
+  // })
+
+const renderItem = ({item}) => {
     if (item.type === 'proxyToken')
     {
       return <View style={styles.questionCard}
-              key={item.id}
+          key={item.id}
+          >
+          <View style={styles.numOfCard}>
+            <Text style={styles.textPrimary}>#{Number(item.id)}</Text>
+          </View>
+          <View style={styles.question}>
+            <Text style={[styles.textPrimary]}>Question: </Text>
+            <TextInput
+            style={[styles.textSecondary, styles.questionInputText]}
+            placeholder='Type the question here...'
+            value={!disableField ? inputQuestionValue : ''}
+            editable={!disableField}
+            onChangeText={text => setInputQuestionValue(text)}
+            />
+          </View>
+          <View style={styles.questionChoices}>
+            <View style={styles.choiceLetter}>
+              <Text style={styles.textPrimary}>A: </Text>
+              <TextInput
+              style={[styles.textSecondary, styles.choiceInputField]}
+              placeholder='Type text here for A...'
+              value={!disableField ? inputAValue : ''}
+              editable={!disableField}
+              onChangeText={text => setInputAValue(text)}
+              />
+              <TouchableOpacity style={styles.correctAnswerToggle}
+              disabled={(item.status === 'dead')}
+              onPress={()=>{setCorrectAnswer('A');}}
               >
-                <View style={styles.numOfCard}>
-                  <Text style={styles.textPrimary}>#{Number(item.id)}</Text>
-                </View>
-                <View style={styles.question}>
-                  <Text style={[styles.textPrimary]}>Question: </Text>
-                  <TextInput
-                  style={[styles.textSecondary, styles.questionInputText]}
-                  placeholder='Type the question here...'
-                  value={!disableField ? inputQuestionValue : ''}
-                  editable={!disableField}
-                  onChangeText={text => setInputQuestionValue(text)}
-                  />
-                </View>
-                <View style={styles.questionChoices}>
-                  <View style={styles.choiceLetter}>
-                    <Text style={styles.textPrimary}>A: </Text>
-                    <TextInput
-                    style={[styles.textSecondary, styles.choiceInputField]}
-                    placeholder='Type text here for A...'
-                    value={!disableField ? inputAValue : ''}
-                    editable={!disableField}
-                    onChangeText={text => setInputAValue(text)}
-                    />
-                    <TouchableOpacity style={styles.correctAnswerToggle}
-                    disabled={(item.status === 'dead')}
-                    onPress={()=>{setCorrectAnswer('A');}}
-                    >
-                      <MaterialIcons 
-                      name={(correctAnswerA === true && item.status === 'alive')? 'star': 'star-outline'}
-                      size={40} 
-                      selectable={undefined}
-                      color="#3C2F60"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.choiceLetter}>
-                    <Text style={styles.textPrimary}>B: </Text>
-                    <TextInput
-                    style={[styles.textSecondary, styles.choiceInputField]}
-                    placeholder='Type text here for B...'
-                    value={!disableField ? inputBValue : ''}
-                    editable={!disableField}
-                    onChangeText={text => setInputBValue(text)}
-                    />
-                    <TouchableOpacity style={styles.correctAnswerToggle}
-                    disabled={(item.status === 'dead')}
-                    onPress={()=>{setCorrectAnswer('B');}}
-                    >
-                      <MaterialIcons 
-                      name={(correctAnswerB === true && item.status === 'alive')? 'star': 'star-outline'}
-                      size={40} 
-                      selectable={undefined}
-                      color="#3C2F60"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.choiceLetter}>
-                    <Text style={styles.textPrimary}>C: </Text>
-                    <TextInput
-                    style={[styles.textSecondary, styles.choiceInputField]}
-                    placeholder='Type text here for C...'
-                    value={!disableField ? inputCValue : ''}
-                    editable={!disableField}
-                    onChangeText={text => setInputCValue(text)}
-                    />
-                    <TouchableOpacity style={styles.correctAnswerToggle}
-                    disabled={(item.status === 'dead')}
-                    onPress={()=>{setCorrectAnswer('C');}}
-                    >
-                      <MaterialIcons 
-                      name={(correctAnswerC === true && item.status === 'alive')? 'star': 'star-outline'}
-                      size={40} 
-                      selectable={undefined}
-                      color="#3C2F60"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.choiceLetter}>
-                    <Text style={styles.textPrimary}>D: </Text>
-                    <TextInput
-                    style={[styles.textSecondary, styles.choiceInputField]}
-                    placeholder='Type text here for D...'
-                    value={!disableField ? inputDValue : ''}
-                    editable={!disableField}
-                    onChangeText={text => setInputDValue(text)}
-                    />
-                    <TouchableOpacity style={styles.correctAnswerToggle}
-                    disabled={(item.status === 'dead')}
-                    onPress={()=>{setCorrectAnswer('D');}}
-                    >
-                      <MaterialIcons 
-                      name={(correctAnswerD === true && item.status === 'alive')? 'star': 'star-outline'}
-                      size={40} 
-                      selectable={undefined}
-                      color="#3C2F60"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                  <View style={styles.correctAnswerField}>
-                    <Text 
-                    style={styles.textPrimary}>Correct Answer: </Text>
-                    <Text
-                    style={
-                      [item.status === 'alive' ? ((getCorrectAnswer() === undefined )? styles.textSecondary : styles.textPrimary) : styles.textSecondary]
-                    }
-                    >
-                      {(getCorrectAnswer() !== undefined && item.status === 'alive') ? getCorrectAnswer() : 'Click star to set correct answer!'}
-                      </Text>
-                  </View>
-                </View>
-              </View>
+                <MaterialIcons 
+                name={(correctAnswerA === true && item.status === 'alive')? 'star': 'star-outline'}
+                size={40} 
+                selectable={undefined}
+                color="#3C2F60"
+                />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.choiceLetter}>
+              <Text style={styles.textPrimary}>B: </Text>
+              <TextInput
+              style={[styles.textSecondary, styles.choiceInputField]}
+              placeholder='Type text here for B...'
+              value={!disableField ? inputBValue : ''}
+              editable={!disableField}
+              onChangeText={text => setInputBValue(text)}
+              />
+              <TouchableOpacity style={styles.correctAnswerToggle}
+              disabled={(item.status === 'dead')}
+              onPress={()=>{setCorrectAnswer('B');}}
+              >
+                <MaterialIcons 
+                name={(correctAnswerB === true && item.status === 'alive')? 'star': 'star-outline'}
+                size={40} 
+                selectable={undefined}
+                color="#3C2F60"
+                />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.choiceLetter}>
+              <Text style={styles.textPrimary}>C: </Text>
+              <TextInput
+              style={[styles.textSecondary, styles.choiceInputField]}
+              placeholder='Type text here for C...'
+              value={!disableField ? inputCValue : ''}
+              editable={!disableField}
+              onChangeText={text => setInputCValue(text)}
+              />
+              <TouchableOpacity style={styles.correctAnswerToggle}
+              disabled={(item.status === 'dead')}
+              onPress={()=>{setCorrectAnswer('C');}}
+              >
+                <MaterialIcons 
+                name={(correctAnswerC === true && item.status === 'alive')? 'star': 'star-outline'}
+                size={40} 
+                selectable={undefined}
+                color="#3C2F60"
+                />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.choiceLetter}>
+              <Text style={styles.textPrimary}>D: </Text>
+              <TextInput
+              style={[styles.textSecondary, styles.choiceInputField]}
+              placeholder='Type text here for D...'
+              value={!disableField ? inputDValue : ''}
+              editable={!disableField}
+              onChangeText={text => setInputDValue(text)}
+              />
+              <TouchableOpacity style={styles.correctAnswerToggle}
+              disabled={(item.status === 'dead')}
+              onPress={()=>{setCorrectAnswer('D');}}
+              >
+                <MaterialIcons 
+                name={(correctAnswerD === true && item.status === 'alive')? 'star': 'star-outline'}
+                size={40} 
+                selectable={undefined}
+                color="#3C2F60"
+                />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.correctAnswerField}>
+              <Text 
+              style={styles.textPrimary}>Correct Answer: </Text>
+              <Text
+              style={
+                [item.status === 'alive' ? ((getCorrectAnswer() === undefined )? styles.textSecondary : styles.textPrimary) : styles.textSecondary]
+              }
+              >
+                {(getCorrectAnswer() !== undefined && item.status === 'alive') ? getCorrectAnswer() : 'Click star to set correct answer!'}
+                </Text>
+            </View>
+          </View>
+        </View>
     } 
     else 
     {
@@ -462,10 +720,10 @@ const addQuiz = () => {
                     onPress={()=>{item.editable && setCorrectAnswer('A', item.id);}}
                     >
                       <MaterialIcons 
-                      name={correctAnswerA === true || item.correctAnswer === 'A' ? 'star': 'star-outline'}
+                      name={ toggleButton === 'Off'&&(item.status === 'alive' && correctAnswerA === true) || item.correctAnswer === 'A' ? 'star': 'star-outline'}
                       size={40} 
                       selectable={undefined}
-                      color={toggleButton === 'On' ? '#3C2F60' : (correctAnswerA === false ? '#9EC6F3' : '#3C2F60')}
+                      color={toggleButton === 'On' ? '#3C2F60' : (correctAnswerA === false ? (item.status === 'alive' ? '#9EC6F3' : '#3C2F60') : '#3C2F60')}
                       />
                     </TouchableOpacity>
                   </View>
@@ -481,10 +739,10 @@ const addQuiz = () => {
                     onPress={()=>{item.editable && setCorrectAnswer('B', item.id);}}
                     >
                       <MaterialIcons 
-                      name={correctAnswerB === true || item.correctAnswer === 'B'  ? 'star': 'star-outline'}
+                      name={toggleButton === 'Off'&&(item.status === 'alive' && correctAnswerB === true )|| item.correctAnswer === 'B'  ? 'star': 'star-outline'}
                       size={40} 
                       selectable={undefined}
-                      color={toggleButton === 'On' ? '#3C2F60' : (correctAnswerB === false ? '#9EC6F3' : '#3C2F60')}
+                      color={toggleButton === 'On' ? '#3C2F60' : (correctAnswerB === false ? (item.status === 'alive' ? '#9EC6F3' : '#3C2F60') : '#3C2F60')}
                       />
                     </TouchableOpacity>
                   </View>
@@ -500,10 +758,10 @@ const addQuiz = () => {
                     onPress={()=>{item.editable && setCorrectAnswer('C', item.id);}}
                     >
                       <MaterialIcons 
-                      name={correctAnswerC === true || item.correctAnswer === 'C'  ? 'star': 'star-outline'}
+                      name={toggleButton === 'Off'&&(item.status === 'alive' && correctAnswerC === true) || item.correctAnswer === 'C'  ? 'star': 'star-outline'}
                       size={40} 
                       selectable={undefined}
-                      color={toggleButton === 'On' ? '#3C2F60' : (correctAnswerC === false ? '#9EC6F3' : '#3C2F60')}
+                      color={toggleButton === 'On' ? '#3C2F60' : (correctAnswerC === false ? (item.status === 'alive' ? '#9EC6F3' : '#3C2F60') : '#3C2F60')}
                       />
                     </TouchableOpacity>
                   </View>
@@ -519,10 +777,10 @@ const addQuiz = () => {
                     onPress={()=>{item.editable && setCorrectAnswer('D', item.id);}}
                     >
                       <MaterialIcons 
-                      name={correctAnswerD === true || item.correctAnswer === 'D'  ? 'star': 'star-outline'}
+                      name={toggleButton === 'Off'&&(item.status === 'alive' && correctAnswerD === true) || item.correctAnswer === 'D'  ? 'star': 'star-outline'}
                       size={40} 
                       selectable={undefined}
-                      color={toggleButton === 'On' ? '#3C2F60' : (correctAnswerD === false ? '#9EC6F3' : '#3C2F60')}
+                      color={toggleButton === 'On' ? '#3C2F60' : (correctAnswerD === false ? (item.status === 'alive' ? '#9EC6F3' : '#3C2F60') : '#3C2F60')}
                       />
                     </TouchableOpacity>
                   </View>
@@ -534,13 +792,21 @@ const addQuiz = () => {
                       [styles.textPrimary]
                     }
                     >
-                      { toggleButton === 'On' ? (item.correctAnswer !== undefined && item.correctAnswer) : getCorrectAnswer()}
+                      { item.status === 'alive' ? (toggleButton === 'On' ? (item.correctAnswer !== undefined && item.correctAnswer) : getCorrectAnswer()) : item.correctAnswer}
                       </Text>
                   </View>
                 </View>
               </View>
     }
   }
+
+// const renderItem = useCallback(({ item }) => {
+//     if (item.type === 'proxyToken') {
+//       return <ProxyQuestionCard item={item} />;
+//     } else {
+//       return <EditableQuestionCard item={item} />;
+//     }
+//   }, [inputAValue, inputBValue, inputCValue, inputDValue, inputQuestionValue, correctAnswerA, correctAnswerB, correctAnswerC, correctAnswerD, toggleButton]);
 
   function resetInputValues(){
     setInputQuestionValue('');
@@ -679,8 +945,12 @@ const addQuiz = () => {
 
 
   return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+       keyboardVerticalOffset={Platform.OS === 'android' ? -80 : 0}
+    >
     <SafeAreaView style={styles.safeContainer}>
-      
       <View style={styles.container}>
         <Link
         href='/quizMenu'
@@ -710,7 +980,8 @@ const addQuiz = () => {
             style={styles.quizTokenContainer}
             data={quizToken}
             renderItem={renderItem}
-            keyExtractor={quizToken => quizToken.id}
+            keyExtractor={quizToken => quizToken.id.toString()}
+            keyboardShouldPersistTaps="handled"
             />
           {/* </KeyboardAvoidingView> */}
         </View>
@@ -718,12 +989,13 @@ const addQuiz = () => {
             <TouchableOpacity style={styles.addNewButton} onPress={()=>{addNewQuestionToken()}}>
               <Text style={[styles.textPrimary, styles.saveButtonText]}>Add new</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.saveButton} onPress={()=>{quizTokenBinding(inputTitleValue, quizToken); tryPrint();}}>
+            <TouchableOpacity style={styles.saveButton} onPress={()=>{quizTokenBinding(inputTitleValue, quizToken); tryPrint(); goToQuizMenu();}}>
               <Text style={[styles.textPrimary, styles.saveButtonText]}> Save </Text>
             </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
+    </KeyboardAvoidingView>
   )
 }
 
