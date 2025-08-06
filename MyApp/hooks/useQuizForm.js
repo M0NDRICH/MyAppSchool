@@ -27,10 +27,15 @@ export const useQuizForm = () => {
 
   // For custom modal
   const [dialogVisible, setDialogVisible] = useState(false);
+  const [titleDialog,     setTitleDialog] = useState('');
   const [dialog,               setDialog] = useState('');
 
   const showDialog = () => setDialogVisible(true);
-  const hideDialog = () => setDialogVisible(false);
+  const hideDialog = () => {
+    setTitleDialog('');
+    setDialog('');
+    setDialogVisible(false);
+  };
 
    // This is a proxy token used for getting the user inputs and also serves as a template
   const sampleQuestionToken = {
@@ -146,16 +151,16 @@ export const useQuizForm = () => {
 
       switch (letter) {
         case "A":
-          setCorrectAnswerA(true);
+          inputAValue !== '' ? setCorrectAnswerA(true) : customModal("Invalid!", 1, 'open');
           break;
         case "B":
-          setCorrectAnswerB(true);
+          inputBValue !== '' ? setCorrectAnswerB(true) : customModal("Invalid", 1, 'open');
           break;
         case "C":
-          setCorrectAnswerC(true);
+          inputCValue !== '' ? setCorrectAnswerC(true) : customModal("Invalid", 1, 'open');
           break;
         case "D":
-          setCorrectAnswerD(true);
+          inputDValue !== '' ? setCorrectAnswerD(true) : customModal("Invalid", 1, 'open');
           break;
         default:
           console.log('setting a correct answer is not executed');
@@ -549,7 +554,25 @@ export const useQuizForm = () => {
     clearAnswerOptions();
   }
 
+  function customModal(title, messageId = 'none' , method){
+    const errMessage = [
+      "Please indicate the correct answer of the current question!",
+      "Can't set the selected letter as the correct answer because it's empty!",
+      "Please type the question of the current page/card!",
+      "A question requires more than one option",
+      "Please make a title for this quiz!",
+    ];
+
+    if (messageId !==  'none' && method === 'open')
+    {
+      setDialog(errMessage[messageId]);
+      setTitleDialog(title);
+      showDialog();
+    }
+  }
+
   const addNewQuestionToken = () => {
+    let invalid = false; // sets to true when required textinputs are left omitted
     if(quizToken[0].status !== 'dead')
     {
       const question = inputQuestionValue;
@@ -567,9 +590,12 @@ export const useQuizForm = () => {
 
       const correctAnswer = getCorrectAnswer();
 
-      // correctAnswer === undefined && 
+      if (correctAnswer === undefined)
+      {
+        customModal("Can't Proceed...", 0 , 'open');
+        invalid = true;
+      } 
 
-      // const id = [...quizToken].length === 0 && 0;
       let id;
       if (quizToken.length === 0)
       {
@@ -593,9 +619,13 @@ export const useQuizForm = () => {
         "correctAnswer" : correctAnswer,
       }
 
-      addNewQuizToken(newQuizToken);
-      resetInputValues();
-      console.log(quizToken)
+      if (!invalid)
+      {
+        addNewQuizToken(newQuizToken);
+        resetInputValues();
+        console.log(quizToken)
+      }
+      
     }
   }
 
@@ -722,6 +752,9 @@ export const useQuizForm = () => {
     // For Modal
     dialogVisible, setDialogVisible,
     dialog,        setDialog,
+    titleDialog,
+    showDialog, 
+    hideDialog,
   };
 
 };

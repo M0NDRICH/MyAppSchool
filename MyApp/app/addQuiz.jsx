@@ -6,7 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import React, { useState, useEffect, useCallback } from 'react'
 import { webStyles, mobileStyles } from '@/components/styles/addQuizStyles'
 import { useQuizForm } from '@/hooks/useQuizForm'
-import { CustomDialog } from '@/components/modal/customModal'
+import CustomDialog  from '@/components/modal/customModal'
 
 const addQuiz = () => {
   const styles = Platform.OS === 'web' ? webStyles : mobileStyles;
@@ -23,6 +23,8 @@ const addQuiz = () => {
     renderHeader,
     dialogVisible, setDialogVisible,
     dialog,        setDialog,
+    showDialog,    hideDialog,
+    titleDialog
    } = useQuizForm();
 
 
@@ -71,13 +73,14 @@ const addQuiz = () => {
             </TouchableOpacity>
         </View>
       </View>
-      {/* <CustomDialog
+      <CustomDialog
         visible={dialogVisible}
-        hideDialog={dialogVisible}
-        title="Confirm Save"
-        content={`Save quiz titled "${''}"?`}
-        onConfirm={console.log("hello world")}
-      /> */}
+        hideDialog={hideDialog}
+        title={titleDialog}
+        content={dialog}
+        onConfirm={hideDialog}
+        oneBtn={true}
+      />
     </SafeAreaView>
     </KeyboardAvoidingView>
   )
