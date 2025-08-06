@@ -284,7 +284,6 @@ export const mobileStyles = StyleSheet.create({
   },
   questionContainer: {
     position: 'relative',
-    backgroundColor: 'white',
     width: '95%',
     height: '70%',
     borderRadius: 8,

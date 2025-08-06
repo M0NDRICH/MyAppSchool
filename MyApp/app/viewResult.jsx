@@ -100,16 +100,15 @@ const viewResult = () => {
       if(ans !== null && ans !== undefined){
         setUserAnswers(answers => [...answers, (ans).toUpperCase()]);
 
-        for(let i = 0; i < myAnswersData.length; i++){
-          setUserAnswersDef(answers => [...answers, choices[i][(ans).toLowerCase()]]);
-        }
+        const def = choices?.[index]?.[ans.toLowerCase()] ?? "N/A";
+        setUserAnswersDef(answers => [...answers, def]);
       }
     })
 
   }
 
-  const redirectToViewResultPage = () => {
-    router.push({pathname: '/viewResult', params: {id: id}})
+  const redirectToResultQuizPage = () => {
+    router.push({pathname: '/resultQuiz', params: {id: id}})
   } 
 
   const printAnswers = () => {
@@ -171,18 +170,20 @@ const viewResult = () => {
   }
 
   const renderItem = ({item}) => {
-    return <View style={styles.questionCard} key={item.num}>
+    return <View 
+            style={item.result === 'correct' ? styles.questionCard : styles.wrongQuestionCard} 
+            key={item.num}>
             <View style={styles.questionCardHeader}>
               <View style={styles.quizNumber}>
-              <Text>{item.num}</Text>
+              <Text style={styles.textSecondary}>{item.num}</Text>
               </View>
               <View style={styles.quizResult}>
-                <Text>{item.result}</Text>
+                <Text style={styles.textSecondary}>{item.result}</Text>
               </View>
             </View>
             <View style={styles.mainBody}>
-              <Text>Question: </Text>
-              <Text>{item.question}</Text>
+              <Text style={styles.textPrimary}>Question: </Text>
+              <Text style={[styles.textTertiary, styles.questionText]}>{item.question}</Text>
             </View>
             <View style={styles.lowerBody}>
               <View style={styles.correctAnsArea}>
@@ -195,7 +196,7 @@ const viewResult = () => {
               <View style={styles.userAnsArea}>
                 <Text style={[styles.textPrimary, styles.userAnsTag]}>{'Your Answer: '+ item.userAnswer}</Text>
                 <View style={styles.details}>
-                  <Text>{item.defOfUserAnswer}</Text>
+                  <Text style={styles.textTertiary}>{item.defOfUserAnswer}</Text>
                 </View>
               </View>
             </View>
@@ -205,7 +206,7 @@ const viewResult = () => {
   return (
     <SafeAreaView style={styles.safeContainer}>
       <View style={styles.container}>
-        <TouchableOpacity style={styles.backButton} onPress={()=>{printResults()}}>
+        <TouchableOpacity style={styles.backButton} onPress={()=>{redirectToResultQuizPage(); printResults()}}>
           <Text style={[styles.textPrimary, styles.backButtonText]}>Back</Text>
         </TouchableOpacity>
         <FlatList
@@ -275,12 +276,11 @@ const styles = StyleSheet.create({
   flatListStyle: {
     marginTop: 50,
     width: '95%',
-    backgroundColor: 'white',
   },
   questionCard: {
-    backgroundColor: '#BDDDE4',
+    backgroundColor: '#9EC6F3',
     width: '90%',
-    height: 500,
+    height: 450,
     borderWidth: 2,
     justifyContent: 'space-around',
     alignItems: 'center',
@@ -290,26 +290,76 @@ const styles = StyleSheet.create({
     borderBottomWidth: 6,
     elevation: 0,
     margin: 'auto',
+    marginBottom: 10,
+    paddingVertical: 10,
+  },
+  wrongQuestionCard: {
+    backgroundColor: '#CD5656',
+    width: '90%',
+    height: 450,
+    borderWidth: 2,
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    borderColor: 'rgb(42, 15, 63)',
+    borderRadius: 10,
+    borderRightWidth: 6,
+    borderBottomWidth: 6,
+    elevation: 0,
+    margin: 'auto',
+    marginBottom: 10,
     paddingVertical: 10,
   },
   questionCardHeader: {
     flexDirection: 'row',
     width: '90%',
     justifyContent: 'space-between',
+  },
+  quizNumber: {
+    width: '20%',
+    height: 30,
+    backgroundColor: 'white',
     borderWidth: 2,
-    borderColor: 'black',
+    borderColor: 'rgb(42, 15, 63)',
+    borderRadius: 10,
+    borderRightWidth: 6,
+    borderBottomWidth: 6,
+    elevation: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  quizResult: {
+    width: '40%',
+    height: 30,
+    backgroundColor: 'white',
+    borderWidth: 2,
+    borderColor: 'rgb(42, 15, 63)',
+    borderRadius: 10,
+    borderRightWidth: 6,
+    borderBottomWidth: 6,
+    elevation: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   mainBody: {
     flexDirection: 'column',
     width: '90%',
+    height: 100,
+    backgroundColor: 'white',
     borderWidth: 2,
-    borderColor: 'black',
+    borderColor: 'rgb(42, 15, 63)',
+    borderRadius: 10,
+    borderRightWidth: 6,
+    borderBottomWidth: 6,
+    elevation: 0,
+  },
+  questionText: {
+    marginLeft: 10,
   },
   lowerBody: {
     flexDirection: 'column',
+    justifyContent: 'space-around',
     width: '90%',
-    borderWidth: 2,
-    borderColor: 'black',
+    height: '50%',
   },
   correctAnsTag: {
     backgroundColor: 'white',
