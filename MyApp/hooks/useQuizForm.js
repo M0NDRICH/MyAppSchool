@@ -146,21 +146,21 @@ export const useQuizForm = () => {
     setCorrectAnswerD(false);
   }
 
-  const setCorrectAnswer = (letter, id = 'none') => {
+  const setCorrectAnswer = (letter, status = 'none') => {
     clearAnswerOptions();
 
       switch (letter) {
         case "A":
-          inputAValue !== '' ? setCorrectAnswerA(true) : customModal("Invalid!", 1, 'open');
+          inputAValue !== '' ? setCorrectAnswerA(true) : status === 'alive' && customModal("Invalid!", 1, 'open');
           break;
         case "B":
-          inputBValue !== '' ? setCorrectAnswerB(true) : customModal("Invalid", 1, 'open');
+          inputBValue !== '' ? setCorrectAnswerB(true) : status === 'alive' && customModal("Invalid", 1, 'open');
           break;
         case "C":
-          inputCValue !== '' ? setCorrectAnswerC(true) : customModal("Invalid", 1, 'open');
+          inputCValue !== '' ? setCorrectAnswerC(true) : status === 'alive' && customModal("Invalid", 1, 'open');
           break;
         case "D":
-          inputDValue !== '' ? setCorrectAnswerD(true) : customModal("Invalid", 1, 'open');
+          inputDValue !== '' ? setCorrectAnswerD(true) : status === 'alive' && customModal("Invalid", 1, 'open');
           break;
         default:
           console.log('setting a correct answer is not executed');
@@ -195,13 +195,15 @@ export const useQuizForm = () => {
 
     if (mode === 'Edit')
     {
-      targetQuiz.question = inputQuestionValue;
-      targetQuiz.editable = false;
-      targetQuiz.A        = inputAValue;
-      targetQuiz.B        = inputBValue;
-      targetQuiz.C        = inputCValue;
-      targetQuiz.D        = inputDValue;
-      targetQuiz.correctAnswer = getCorrectAnswer();
+      const correctAnswer = getCorrectAnswer();
+
+      targetQuiz.question      = inputQuestionValue;
+      targetQuiz.editable      = false;
+      targetQuiz.A             = inputAValue;
+      targetQuiz.B             = inputBValue;
+      targetQuiz.C             = inputCValue;
+      targetQuiz.D             = inputDValue;
+      targetQuiz.correctAnswer = correctAnswer === undefined ? targetQuiz.correctAnswer : correctAnswer ;
     } 
     else if (mode === 'Cancel')
     {
@@ -240,7 +242,6 @@ export const useQuizForm = () => {
         killAllTokens(targetQuizToken.id, 'kill')
         disableProxy();
         assignValuesToTextFields(targetQuizToken);
-        // setCorrectAnswer(getCorrectAnswer());
         targetQuizToken.editable = true;
       }
 
@@ -323,7 +324,7 @@ export const useQuizForm = () => {
               />
               <TouchableOpacity style={styles.correctAnswerToggle}
               disabled={(item.status === 'dead')}
-              onPress={()=>{setCorrectAnswer('A');}}
+              onPress={()=>{setCorrectAnswer('A', item.status);}}
               >
                 <MaterialIcons 
                 name={(correctAnswerA === true && item.status === 'alive')? 'star': 'star-outline'}
@@ -344,7 +345,7 @@ export const useQuizForm = () => {
               />
               <TouchableOpacity style={styles.correctAnswerToggle}
               disabled={(item.status === 'dead')}
-              onPress={()=>{setCorrectAnswer('B');}}
+              onPress={()=>{setCorrectAnswer('B', item.status);}}
               >
                 <MaterialIcons 
                 name={(correctAnswerB === true && item.status === 'alive')? 'star': 'star-outline'}
@@ -365,7 +366,7 @@ export const useQuizForm = () => {
               />
               <TouchableOpacity style={styles.correctAnswerToggle}
               disabled={(item.status === 'dead')}
-              onPress={()=>{setCorrectAnswer('C');}}
+              onPress={()=>{setCorrectAnswer('C', item.status);}}
               >
                 <MaterialIcons 
                 name={(correctAnswerC === true && item.status === 'alive')? 'star': 'star-outline'}
@@ -386,7 +387,7 @@ export const useQuizForm = () => {
               />
               <TouchableOpacity style={styles.correctAnswerToggle}
               disabled={(item.status === 'dead')}
-              onPress={()=>{setCorrectAnswer('D');}}
+              onPress={()=>{setCorrectAnswer('D', item.status);}}
               >
                 <MaterialIcons 
                 name={(correctAnswerD === true && item.status === 'alive')? 'star': 'star-outline'}
@@ -462,7 +463,7 @@ export const useQuizForm = () => {
                     onChangeText={text => setInputAValue(text)}
                     />
                     <TouchableOpacity style={styles.correctAnswerToggle}
-                    onPress={()=>{item.editable && setCorrectAnswer('A', item.id);}}
+                    onPress={()=>{item.editable && setCorrectAnswer('A', item.status);}}
                     >
                       <MaterialIcons 
                       name={ toggleButton === 'Off'&&(item.status === 'alive' && correctAnswerA === true) || item.correctAnswer === 'A' ? 'star': 'star-outline'}
@@ -481,7 +482,7 @@ export const useQuizForm = () => {
                     onChangeText={text => setInputBValue(text)}
                     />
                     <TouchableOpacity style={styles.correctAnswerToggle}
-                    onPress={()=>{item.editable && setCorrectAnswer('B', item.id);}}
+                    onPress={()=>{item.editable && setCorrectAnswer('B', item.status);}}
                     >
                       <MaterialIcons 
                       name={toggleButton === 'Off'&&(item.status === 'alive' && correctAnswerB === true )|| item.correctAnswer === 'B'  ? 'star': 'star-outline'}
@@ -500,7 +501,7 @@ export const useQuizForm = () => {
                     onChangeText={text => setInputCValue(text)}
                     />
                     <TouchableOpacity style={styles.correctAnswerToggle}
-                    onPress={()=>{item.editable && setCorrectAnswer('C', item.id);}}
+                    onPress={()=>{item.editable && setCorrectAnswer('C', item.status);}}
                     >
                       <MaterialIcons 
                       name={toggleButton === 'Off'&&(item.status === 'alive' && correctAnswerC === true) || item.correctAnswer === 'C'  ? 'star': 'star-outline'}
@@ -519,7 +520,7 @@ export const useQuizForm = () => {
                     onChangeText={text => setInputDValue(text)}
                     />
                     <TouchableOpacity style={styles.correctAnswerToggle}
-                    onPress={()=>{item.editable && setCorrectAnswer('D', item.id);}}
+                    onPress={()=>{item.editable && setCorrectAnswer('D', item.status);}}
                     >
                       <MaterialIcons 
                       name={toggleButton === 'Off'&&(item.status === 'alive' && correctAnswerD === true) || item.correctAnswer === 'D'  ? 'star': 'star-outline'}
@@ -561,6 +562,7 @@ export const useQuizForm = () => {
       "Please type the question of the current page/card!",
       "A question requires more than one option",
       "Please make a title for this quiz!",
+      "There's no saved question, no.0 is just for user input!"
     ];
 
     if (messageId !==  'none' && method === 'open')
@@ -571,30 +573,50 @@ export const useQuizForm = () => {
     }
   }
 
+  const validateInputs = (question, a, b, c, d, correctAns) => {
+    let isValid = true;
+    let choiceCounter = 0;
+
+    if (question === '')
+    {
+      customModal("Can't Proceed...", 2, 'open');
+      isValid = false;
+    }
+
+    if (correctAns === undefined)
+    {
+      customModal("Can't Proceed...", 0 , 'open');
+      isValid = false;
+    } 
+
+    a !== '' && ++choiceCounter;
+    b !== '' && ++choiceCounter;
+    c !== '' && ++choiceCounter;
+    d !== '' && ++choiceCounter;
+
+    if (choiceCounter === 0 || choiceCounter === 1)
+    {
+      customModal("Can't Proceed...", 3, 'open');
+      isValid = false;
+    }
+
+    return isValid;
+  }
+
   const addNewQuestionToken = () => {
     let invalid = false; // sets to true when required textinputs are left omitted
     if(quizToken[0].status !== 'dead')
     {
       const question = inputQuestionValue;
-      const choiceA = inputAValue;
-      const choiceB =  inputBValue;
-      const choiceC = inputCValue;
-      const choiceD = inputDValue;
-
-      const choices = {
-        "a": choiceA,
-        "b": choiceB,
-        "c": choiceC,
-        "d": choiceD,
-      };
+      const choiceA  = inputAValue;
+      const choiceB  = inputBValue;
+      const choiceC  = inputCValue;
+      const choiceD  = inputDValue;
 
       const correctAnswer = getCorrectAnswer();
 
-      if (correctAnswer === undefined)
-      {
-        customModal("Can't Proceed...", 0 , 'open');
-        invalid = true;
-      } 
+      const result = validateInputs(question, choiceA, choiceB, choiceC, choiceD, correctAnswer);
+      result === true ? invalid = false : invalid = true;
 
       let id;
       if (quizToken.length === 0)
@@ -654,50 +676,61 @@ export const useQuizForm = () => {
     let choices        = [];
     let correctAnswers = [];
 
-    const questionTokens = items.filter((item)=>{
-      if (item.id !== 0)
-      {
-        return true;
-      }
-    })
+    if( title === '') 
+    {
+      customModal("Can't save the quiz.", 4, 'open');
+    }
+    else if ( quizToken.length === 1)
+    {
+      customModal("Can't save the quiz.", 5, 'open');
+    }
+    else
+    {
+      const questionTokens = items.filter((item)=>{
+        if (item.id !== 0)
+        {
+          return true;
+        }
+      });
 
-    questionTokens.forEach((item)=>{
-      questions.push(item.question);
-    });
+      questionTokens.forEach((item)=>{
+        questions.push(item.question);
+      });
 
-    questionTokens.forEach((item)=>{
-      choices.push({
-        "a" : item.A,
-        "b" : item.B,
-        "c" : item.C,
-        "d" : item.D
-      })
-    });
+      questionTokens.forEach((item)=>{
+        choices.push({
+          "a" : item.A,
+          "b" : item.B,
+          "c" : item.C,
+          "d" : item.D
+        })
+      });
 
-    questionTokens.forEach((item)=>{
-      const letter  = item.correctAnswer;
-      const letterOfChoice = (letter).toLowerCase();
-      const details = item[letter];
+      questionTokens.forEach((item)=>{
+        const letter  = item.correctAnswer;
+        const letterOfChoice = (letter).toLowerCase();
+        const details = item[letter];
 
-      correctAnswers.push({ [letterOfChoice] : details});
-    });
+        correctAnswers.push({ [letterOfChoice] : details});
+      });
 
-    // finalQuizTokenArray.length === 0 ? id = 1 : (id = Number(finalQuizTokenArray.length) + 1);
+      // finalQuizTokenArray.length === 0 ? id = 1 : (id = Number(finalQuizTokenArray.length) + 1);
 
-    id = generateNextId(finalQuizTokenArray);
+      id = generateNextId(finalQuizTokenArray);
 
-    theFinalQuizToken = {
-      "id": id,
-      "title": title,
-      "questions": questions,
-      "choices": choices,
-      "correctAnswers": correctAnswers,
-    };
+      theFinalQuizToken = {
+        "id": id,
+        "title": title,
+        "questions": questions,
+        "choices": choices,
+        "correctAnswers": correctAnswers,
+      };
 
-    console.log(theFinalQuizToken);
+      console.log(theFinalQuizToken);
 
-    setFinalQuizTokenArray(prev => [theFinalQuizToken, ...prev ]);
-    
+      setFinalQuizTokenArray(prev => [theFinalQuizToken, ...prev ]);
+      goToQuizMenu();
+    }
   }
 
   const clearQuizCollection = async () => {

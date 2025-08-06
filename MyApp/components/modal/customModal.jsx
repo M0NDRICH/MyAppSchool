@@ -2,10 +2,12 @@
 import { StyleSheet, Platform } from 'react-native';
 import React from 'react';
 import { Dialog, Portal, Button, Text } from 'react-native-paper';
+import { Shadow } from 'react-native-shadow-2';
 
 const CustomDialog = ({ visible, hideDialog, title, content, onConfirm, oneBtn }) => {
   
-  const styles = Platform.OS === 'web' ? webStyles : mobileStyles;
+  // const styles = Platform.OS === 'web' ? webStyles : mobileStyles;
+  const styles = webStyles;
 
   if (oneBtn === true){
     return (
@@ -16,7 +18,7 @@ const CustomDialog = ({ visible, hideDialog, title, content, onConfirm, oneBtn }
             <Text style={styles.dialogTextSecondary}>{content}</Text>
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={onConfirm} >
+            <Button onPress={onConfirm} style={styles.button}>
               <Text style={styles.dialogButtonText}>Ok</Text>
             </Button>
           </Dialog.Actions>
@@ -54,6 +56,12 @@ const webStyles = StyleSheet.create({
   dialog: {
     backgroundColor: '#BDDDE4',
     borderRadius: 8,
+    borderWidth: 2,
+    borderColor: 'rgb(42, 15, 63)',
+    borderRadius: 10,
+    borderRightWidth: 6,
+    borderBottomWidth: 6,
+    elevation: 0,
   },
   dialogTitle: {
     fontWeight: 'bold',
@@ -69,5 +77,14 @@ const webStyles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#3C2F60',
     fontSize: 16,
+  },
+  button: {
+    borderWidth: 2,
+    backgroundColor: '#FFF1D5',
+    borderColor: 'rgb(42, 15, 63)',
+    borderRadius: 10,
+    borderRightWidth: 6,
+    borderBottomWidth: 6,
+    elevation: 0,
   }
 });

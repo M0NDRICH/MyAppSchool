@@ -68,7 +68,7 @@ const addQuiz = () => {
             <TouchableOpacity style={styles.addNewButton} onPress={()=>{addNewQuestionToken()}}>
               <Text style={[styles.textPrimary, styles.saveButtonText]}>Add new</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.saveButton} onPress={()=>{quizTokenBinding(inputTitleValue, quizToken); tryPrint(); goToQuizMenu();}}>
+            <TouchableOpacity style={styles.saveButton} onPress={()=>{quizTokenBinding(inputTitleValue, quizToken); tryPrint();}}>
               <Text style={[styles.textPrimary, styles.saveButtonText]}> Save </Text>
             </TouchableOpacity>
         </View>

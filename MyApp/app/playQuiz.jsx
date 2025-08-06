@@ -68,6 +68,15 @@ const playQuiz = () => {
     
   }
 
+  useEffect(()=> {
+    const clearStorage = async () => {
+      setScore(0);
+      await AsyncStorage.removeItem('myAnswers');
+    }
+
+    clearStorage();
+  },[]);
+
   useEffect (()=>{
     const saveAnswersToStorage = async () => {
       try {
@@ -129,28 +138,28 @@ const playQuiz = () => {
       <>
         {choices.a !== null && (
           <TouchableOpacity onPress={()=>{ handleAnswer('A')}}>
-          <View style={styles.quizQuestionChoice}>
+          <View style={currentAnswer === 'A' ? styles.selectedChoice : styles.quizQuestionChoice}>
               <Text style={styles.quizQuestionChoiceText}>A: {choices.a}</Text>
           </View>
           </TouchableOpacity>
         )}
         {choices.b !== null && (
           <TouchableOpacity onPress={()=>{ handleAnswer('B')}}>
-          <View style={styles.quizQuestionChoice}>
+          <View style={currentAnswer === 'B' ? styles.selectedChoice :  styles.quizQuestionChoice}>
               <Text style={styles.quizQuestionChoiceText}>B: {choices.b}</Text>
           </View>
           </TouchableOpacity>
         )}
         {choices.c !== null && (
           <TouchableOpacity onPress={()=>{ handleAnswer('C')}}>
-          <View style={styles.quizQuestionChoice}>
+          <View style={currentAnswer === 'C' ? styles.selectedChoice : styles.quizQuestionChoice}>
               <Text style={styles.quizQuestionChoiceText}>C: {choices.c}</Text>
           </View>
           </TouchableOpacity>
         )}
         {choices.d !== null && (
           <TouchableOpacity onPress={()=>{ handleAnswer('D')}}>
-          <View style={styles.quizQuestionChoice}>
+          <View style={currentAnswer === 'D' ? styles.selectedChoice : styles.quizQuestionChoice}>
               <Text style={styles.quizQuestionChoiceText}>D: {choices.d}</Text>
           </View>
           </TouchableOpacity>

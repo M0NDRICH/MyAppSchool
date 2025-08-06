@@ -1,7 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import React, { useState, useEffect } from 'react'
-import { useLocalSearchParams, Link } from 'expo-router'
+import { useLocalSearchParams, Link, router } from 'expo-router'
 import { myAnswers } from '@/data/quizAnswers'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { data } from '@/data/quizzes'
@@ -94,9 +94,7 @@ const resultQuiz = () => {
     })
 
     setCorrectAnswers(result);
-    // return result;
   }
- 
 
   function extractUserAnswer(){
 
@@ -118,6 +116,10 @@ const resultQuiz = () => {
   //   }
   // }, [myAnswersData]);
 
+
+  const redirectToViewResultPage = () => {
+    router.push({pathname: '/viewResult', params: {id: id}})
+  } 
 
   const printAnswers = () => {
     console.log(myAnswersData)
@@ -172,11 +174,11 @@ const resultQuiz = () => {
           <Text style={styles.resultTextTitle}>Result:</Text>
           <Text style={styles.resultText}>Your Score is {score}/{targetQuizToken.questions.length}!</Text>
         </View>
-        <TouchableOpacity onPress={()=>{ printAnswers();}} style={styles.buttonReviewAnswers}>
+        <TouchableOpacity onPress={()=>{ redirectToViewResultPage()}} style={styles.buttonReviewAnswers}>
           <Text style={styles.buttonText}>View Answers</Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.okButton} onPress={clearStorage}>
+      <TouchableOpacity style={styles.okButton} onPress={redirectToViewResultPage}>
         <Text style={styles.buttonText}>OK</Text>
       </TouchableOpacity>
     </SafeAreaView>

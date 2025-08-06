@@ -96,10 +96,10 @@ const home = () => {
       }}
       asChild
       >
-      <Pressable style={styles.quizToken}>
+      <TouchableOpacity style={styles.quizToken}>
         <Text style={styles.quizText}>{item.title}</Text>
         <Text style={styles.quizText}>Items: {item.questions.length}</Text>
-      </Pressable>
+      </TouchableOpacity>
       </Link>
 
       <TouchableOpacity

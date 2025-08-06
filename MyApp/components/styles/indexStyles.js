@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from "react-native";
+import { Shadow } from "react-native-shadow-2";
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -100,18 +101,29 @@ export const mobileStyles = StyleSheet.create({
     zIndex: 3,
     justifyContent: 'center',
     alignItems: 'center',
+    gap: 20,
     width: '100%',
   },
   button: {
-    height: 40,
-    width: windowWidth * 0.80,
-    borderRadius: 8,
-    justifyContent: 'center',
-    // backgroundColor: 'rgba(0,0,0,0.75)',
+    height: 50,
+    width: 200,
     backgroundColor: '#9EC6F3',
-    paddingHorizontal: 60,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderRightWidth: 6,
+    borderBottomWidth: 6,
+    borderColor: 'rgb(42, 15, 63)',
+    elevation: 0,
+    paddingHorizontal: 0,
     paddingVertical: 0,
-    marginBottom: 5,
+  },
+  buttonCover: {
+    backgroundColor: '#9EC6F3',
+    height: 40,
+    width: '100%',
+    borderRadius: 8,
   },
   text: {
     color: 'white',

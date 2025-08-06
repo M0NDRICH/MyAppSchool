@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, Platform } from 'react-native'
 import React from 'react'
-import { Link } from 'expo-router'
+import { Link, router } from 'expo-router'
 import { webStyles, mobileStyles } from '@/components/styles/aboutStyles'
 
 import monLogo from '@/assets/images/MONDRICH-Logo.png'
@@ -9,16 +9,15 @@ import brcLogo from '@/assets/images/BRC-logo.png'
 const explore = () => {
    const styles = Platform.OS === 'web' ? webStyles : mobileStyles;
 
+   const returnIndex = () => {
+    router.push('/');
+   };
+
   return (
     <View style={styles.container}>
-      <Link
-      href="/"
-      asChild
-      >
-        <TouchableOpacity style={styles.backButton}> 
-          <Text style={styles.backButtonText}>Back</Text>
-        </TouchableOpacity>
-      </Link>
+      <TouchableOpacity style={styles.backButton} onPress={()=>{returnIndex();}}> 
+        <Text style={styles.backButtonText}>Back</Text>
+      </TouchableOpacity>
       <View style={styles.card}>
         <Image
           style={styles.monLogo}

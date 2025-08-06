@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, ImageBackground, Image, SafeAreaView, TouchableOpacity, Dimensions, Pressable, Platform } from 'react-native'
-import { useRouter, Link } from 'expo-router';
+import { router, Link } from 'expo-router';
 import { webStyles, mobileStyles } from '@/components/styles/indexStyles';
+import { Shadow } from 'react-native-shadow-2';
 
 import React from 'react'
 import manImg from "@/assets/images/man-pointing.png"
@@ -14,6 +15,14 @@ const CustomButton = ({ title, onPress }) => (
 
 const App = () => {
   const styles = Platform.OS === 'web' ? webStyles : mobileStyles;
+
+  const goToAbout = () => {
+    router.push('/about');
+  };
+  const goToQuizMenu = () => {
+    router.push('/quizMenu');
+  };
+
 
   return (
     <SafeAreaView style={styles.safeContainer} >
@@ -37,24 +46,19 @@ const App = () => {
         </Text>
        </View>
        <View style={styles.buttonPart}>
-        <Link 
-        href="/quizMenu" 
-        style={{ marginHorizontal: 'auto' }}
-        asChild>
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>Enter</Text>
-        </Pressable>
-        </Link>
-        <Link 
-        href="/about" 
-        style={{ marginHorizontal: 'auto' }}
-        asChild>
-        <Pressable style={styles.button}>
-          <Text style={styles.buttonText}>About</Text>
-        </Pressable>
-        </Link>
-
-       </View>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={()=>{goToQuizMenu();}}
+        >
+            <Text style={styles.buttonText}>Enter</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={()=>{goToAbout();}}
+        >
+            <Text style={styles.buttonText}>About</Text>
+        </TouchableOpacity>
+        </View>
       </View>
       <View style={styles.circle3}></View>
       <View style={styles.circle4}></View>
